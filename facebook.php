@@ -56,66 +56,6 @@ class Facebook {
 		}
 	}
 	
-	public function setAccessToken ($access_token) {
-		$this->access_token	= $access_token;
-	}
-	
-	public function getAccessToken () {
-		return $this->access_token;
-	}
-	
-	public function parseSignedRequest ($raw_signed_request) {
-		$signed_request = [];
-	
-		list($signed_request['encoded_sig'], $signed_request['payload']) = array_map(function ($input) {
-			return base64_decode(strtr($input, '-_', '+/'));
-		}, explode('.', $raw_signed_request, 2));
-		
-		$data = json_decode($signed_request['payload'], true);
-		
-		if (strtoupper($data['algorithm']) !== 'HMAC-SHA256') {
-			throw new Facebook_Exception('Unknown algorithm. Expected HMAC-SHA256.');
-		}
-		
-		$expected_sig = hash_hmac('sha256', $signed_request['payload'], $this->app_secret, true);
-		
-		if ($signed_request['encoded_sig'] !== $expected_sig) {
-			throw new Facebook_Exception('Invalid signed request.');
-		}
-		
-		$this->signed_request = $data;
-		
-		return $data;
-	}
-	
-	public function getAccessTokenFromCode ($code) {
-		$url = $this->getUrl('graph', 'oauth/access_token', [
-			'client_id' => $this->getAppId(),
-			'redirect_uri' => '',
-			'client_secret' => $this->getAppSecret(),
-			'code' => $code
-		]);
-		
-		$response = $this->makeRequest($url);
-		
-		parse_str($response, $access_token);
-		
-		return $access_token;
-	}
-	
-	/**
-	 * Refer to https://developers.facebook.com/docs/reference/api/securing-graph-api/
-	 */
-	public function getAppSecretProof () {
-		$access_token = $this->getAccessToken();
-		
-		if (!$access_token) {
-			return;
-		}
-	
-		return hash_hmac('sha256', $access_token, $this->getAppSecret())
-	}
-	
 	public function extendAccessToken ($access_token = null) {
 		if ($access_token === null) {
 			$access_token = $this->access_token;
@@ -141,6 +81,85 @@ class Facebook {
 		$access_token['expires'] += time();
 		
 		return $access_token;
+	}
+	
+	public function getAccessToken () {
+		return $this->access_token;
+	}
+	
+	public function getAccessTokenFromCode ($code) {
+		$url = $this->getUrl('graph', 'oauth/access_token', [
+			'client_id' => $this->getAppId(),
+			'redirect_uri' => '',
+			'client_secret' => $this->getAppSecret(),
+			'code' => $code
+		]);
+		
+		$response = $this->makeRequest($url);
+		
+		parse_str($response, $access_token);
+		
+		return $access_token;
+	}
+	
+	/**
+	 * This is used to prevent CSRF access_token reuse as described in
+	 * https://developers.facebook.com/docs/reference/api/securing-graph-api/
+	 */
+	private function getAppSecretProof () {
+		$access_token = $this->getAccessToken();
+		
+		if (!$access_token) {
+			return;
+		}
+	
+		return hash_hmac('sha256', $access_token, $this->getAppSecret())
+	}
+	
+	/**
+	 * This will redirect user to Facebook authentication page as described in https://developers.facebook.com/docs/appsonfacebook/tutorial/#auth.
+	 * 
+	 * @param string $scope Refer to https://developers.facebook.com/docs/reference/dialogs/oauth/
+	 * @param array $app_data Refer to https://developers.facebook.com/docs/reference/login/signed-request/
+	 * @param string $redirect_uri Refer to https://developers.facebook.com/docs/reference/login/signed-request/
+	 */
+	public function initiateAuthorisation ($scope = '', $app_data = [], $redirect_url = null) {
+		if (!$redirect_url && $this->url_app) {
+			$redirect_url = $this->url_app;
+		} else (!$redirect_url) {
+			throw new \ErrorException('$redirect_url parameter not provided and $url_app parameter is undefined.');
+		}
+		
+		if ($app_data) {
+			$url = parse_url($redirect_url);
+			
+			if (empty($url['query'])) {
+				$url['query'] = [];
+			} else {
+				parse_str($url['query'], $url['query']);
+			}
+			
+			$url['query'] = http_build_str(['app_data' => $app_data] + $url['query']);
+			
+			$redirect_url = http_build_url($url);
+		}
+		
+		$parameters	= [
+			'client_id' => $this->app_id,
+			'redirect_uri' => $redirect_url,
+			// @todo Seems like I forgot to validate the state token upon receiving a request.
+			'state' => $_SESSION['ay']['facebook'][$this->app_id]['state'],
+			'scope' => $scope
+		];
+		
+		
+		$_SESSION['ay']['facebook'][$this->app_id]['state'] = bin2hex(openssl_random_pseudo_bytes(10));
+	
+		$login_url = $this->getUrl('www', 'dialog/oauth', $parameters);
+		
+		echo '<noscript>JavaScript must be enabled.</noscript><script>top.location.href = ' . json_encode($login_url) . ';</script>';
+		
+		exit;
 	}
 	
 	private function makeRequest ($url, $post = null) {	
@@ -193,21 +212,12 @@ class Facebook {
 	/**
 	 * Retrieve API specific URL with custom path and GET parameters.
 	 *
-	 * @param string $name
+	 * @param string $endpoint_name ['api', 'video-api', 'api-read', 'graph', 'graph-video', 'www']
 	 * @param string $path
 	 * @param array $parameters
 	 */
-	private function getUrl ($name, $path = '', array $parameters = []) {
-		$domain_map	= [
-			'api' => 'https://api.facebook.com/',
-			'api_video' => 'https://api-video.facebook.com/',
-			'api_read' => 'https://api-read.facebook.com/',
-			'graph' => 'https://graph.facebook.com/',
-			'graph_video' => 'https://graph-video.facebook.com/',
-			'www' => 'https://www.facebook.com/'
-		];
-		
-		$url = $domain_map[$name] . trim($path, '/');
+	private function makeRequestUrl ($endpoint_name, $path = '', array $parameters = []) {	
+		$url = 'https://' . $endpoint_name . '.facebook.com/' . trim($path, '/');
 		
 		if ($app_secret_proof = $this->getAppSecretProof()) {
 			$parameters['appsecret_proof'] = $app_secret_proof;
@@ -221,50 +231,40 @@ class Facebook {
 	}
 	
 	/**
-	 * @param string $scope Refer to https://developers.facebook.com/docs/reference/dialogs/oauth/
-	 * @param array $app_data Refer to https://developers.facebook.com/docs/reference/login/signed-request/
-	 * @param string $redirect_uri Refer to https://developers.facebook.com/docs/reference/login/signed-request/
+	 * Parse sign request and validate the signature.
+	 *
+	 * @param string $raw_signed_request
 	 */
-	public function authorize ($scope = '', $app_data = [], $redirect_url = null) {
-		if (!empty($app_data)) {
-			$url = parse_url($redirect_uri);
-			
-			if (empty($url['query'])) {
-				$url['query'] = ['app_data' => $app_data];
-			} else {
-				parse_str($url['query'], $url['query']);
-			
-				$url['query'] = array_merge($url['query'], array('app_data' => $app_data));
-			}
-			
-			$url['query'] = http_build_str($url['query']);
-			
-			$redirect_uri = http_build_url($url);
-		}
-		
-		if (!$redirect_url && $this->url_app) {
-			$redirect_url = $this->url_app;
-		} else {
-			throw new \ErrorException('$redirect_url parameter not provided and $url_app parameter is undefined.');
-		}
-		
-		$parameters	= [
-			'client_id' => $this->app_id,
-			'redirect_uri' => $redirect_url,
-			'state' => $_SESSION['ay']['facebook'][$this->app_id]['state'],
-			'scope' => $scope
-		];
-		
-		
-		$_SESSION['ay']['facebook'][$this->app_id]['state'] = bin2hex(openssl_random_pseudo_bytes(10));
+	public function parseSignedRequest ($raw_signed_request) {
+		$signed_request = [];
 	
-		$login_url = $this->getUrl('www', 'dialog/oauth', $parameters);
+		list($signed_request['encoded_sig'], $signed_request['payload']) = array_map(function ($input) {
+			return base64_decode(strtr($input, '-_', '+/'));
+		}, explode('.', $raw_signed_request, 2));
 		
-		echo '
-			<noscript>JavaScript must be enabled.</noscript>
-			<script type="text/javascript">top.location.href = \'' . addslashes($login_url) . '\';</script>
-		';
+		$expected_signature = hash_hmac('sha256', $signed_request['payload'], $this->app_secret, true);
 		
-		exit;
+		if ($signed_request['encoded_sig'] !== $expected_signature) {
+			throw new Facebook_Exception('Invalid signature.');
+		}
+		
+		$signed_request['payload'] = json_decode($signed_request['payload'], true);
+		
+		if ($signed_request['payload']['algorithm'] !== 'HMAC-SHA256') {
+			throw new Facebook_Exception('Unrecognised algorithm. Expected HMAC-SHA256.');
+		}
+				
+		$this->signed_request = $data;
+		
+		return $data;
+	}
+	
+	/**
+	 * Set the access token for the api calls.
+	 *
+	 * @param string $access_token
+	 */
+	public function setAccessToken ($access_token) {
+		$this->access_token	= $access_token;
 	}
 }
