@@ -5,10 +5,11 @@ class Facebook {
 	private
 		$app_id,
 		$app_secret,
-		$url_app,
+		// Refers to the page where the app is being used. It can be either Facebook Page, Facebook App Page or user website.
+		$app_url,
 		$access_token,
 		$signed_request,
-		$locale;
+		$user_locale;
 	
 	
 	public function __construct (array $config) {
@@ -20,17 +21,17 @@ class Facebook {
 		}
 		
 		if (!empty($this->signed_request['user']['locale'])) {
-			$_SESSION['ay']['facebook'][$this->app_id]['locale'] = $this->signed_request['user']['locale'];
+			$_SESSION['ay']['facebook'][$this->app_id]['user']['locale'] = $this->signed_request['user']['locale'];
 		}
 		
 		if (empty($_SESSION['ay']['facebook'][$this->app_id]['locale'])) {
-			$_SESSION['ay']['facebook'][$this->app_id]['locale'] = 'en_US';
+			$_SESSION['ay']['facebook'][$this->app_id]['user']['locale'] = 'en_US';
 		}
 		
-		$this->locale = $_SESSION['ay']['facebook'][$this->app_id]['locale'];
+		$this->user_locale = $_SESSION['ay']['facebook'][$this->app_id]['user']['locale'];
 		
-		if (!empty($config['url_app'])) {
-			$this->url_app = $config['url_app'];
+		if (!empty($config['app_url'])) {
+			$this->app_url = $config['app_url'];
 		}
 	}
 	
@@ -102,6 +103,10 @@ class Facebook {
 		return $access_token;
 	}
 	
+	public function getAppId () {
+		return $this->app_id;
+	}
+	
 	/**
 	 * This is used to prevent CSRF access_token reuse as described in
 	 * https://developers.facebook.com/docs/reference/api/securing-graph-api/
@@ -113,7 +118,15 @@ class Facebook {
 			return;
 		}
 	
-		return hash_hmac('sha256', $access_token, $this->getAppSecret())
+		return hash_hmac('sha256', $access_token, $this->getAppSecret());
+	}
+	
+	public function getAppUrl () {
+		return $this->app_url;
+	}
+	
+	public function getUserLocale () {
+		return $this->user_locale;
 	}
 	
 	/**
@@ -124,9 +137,9 @@ class Facebook {
 	 * @param string $redirect_uri Refer to https://developers.facebook.com/docs/reference/login/signed-request/
 	 */
 	public function initiateAuthorisation ($scope = '', $app_data = [], $redirect_url = null) {
-		if (!$redirect_url && $this->url_app) {
-			$redirect_url = $this->url_app;
-		} else (!$redirect_url) {
+		if (!$redirect_url && $this->app_url) {
+			$redirect_url = $this->app_url;
+		} else if (!$redirect_url) {
 			throw new \ErrorException('$redirect_url parameter not provided and $url_app parameter is undefined.');
 		}
 		
