@@ -103,6 +103,19 @@ class Facebook {
 		return $access_token;
 	}
 	
+	/**
+	 * Refer to https://developers.facebook.com/docs/reference/api/securing-graph-api/
+	 */
+	public function getAppSecretProof () {
+		$access_token = $this->getAccessToken();
+		
+		if (!$access_token) {
+			return;
+		}
+	
+		return hash_hmac('sha256', $access_token, $this->getAppSecret())
+	}
+	
 	public function extendAccessToken ($access_token = null) {
 		if ($access_token === null) {
 			$access_token = $this->access_token;
@@ -178,12 +191,13 @@ class Facebook {
 	}
 	
 	/**
-	 * Retrieve API specific URL with custom path and parameters.
+	 * Retrieve API specific URL with custom path and GET parameters.
+	 *
 	 * @param string $name
 	 * @param string $path
 	 * @param array $parameters
 	 */
-	private function getUrl ($name, $path = null, array $parameters = null) {
+	private function getUrl ($name, $path = '', array $parameters = []) {
 		$domain_map	= [
 			'api' => 'https://api.facebook.com/',
 			'api_video' => 'https://api-video.facebook.com/',
@@ -194,6 +208,10 @@ class Facebook {
 		];
 		
 		$url = $domain_map[$name] . trim($path, '/');
+		
+		if ($app_secret_proof = $this->getAppSecretProof()) {
+			$parameters['appsecret_proof'] = $app_secret_proof;
+		}
 		
 		if ($parameters) {
 			$url .= '?' . http_build_query($parameters);
