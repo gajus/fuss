@@ -6,9 +6,9 @@ class Facebook {
 		$app_id,
 		$app_secret,
 		$signed_request,
+		$user_id,
 		$user_access_token,
 		$user_locale;
-	
 	
 	public function __construct (array $config) {
 		$this->app_id = $config['app_id'];
@@ -16,9 +16,13 @@ class Facebook {
 		
 		if (!empty($_POST['signed_request'])) {
 			$this->parseSignedRequest($_POST['signed_request']);
-		} else if (isset($_SESSION['ay']['facebook'][$this->app_id]['user']['access_token'])) {
-			$this->setUserAccessToken($_SESSION['ay']['facebook'][$this->app_id]['user']['access_token']);
+		} else if (isset($_SESSION['ay']['facebook'][$this->app_id]['signed_request'])) {
+			$this->parseSignedRequest($_SESSION['ay']['facebook'][$this->app_id]['signed_request']);
 		}
+		
+		#} else if (isset($_SESSION['ay']['facebook'][$this->app_id]['user']['access_token'])) {
+		#	$this->setUserAccessToken($_SESSION['ay']['facebook'][$this->app_id]['user']['access_token']);
+		#}
 		
 		if (!empty($this->signed_request['user']['locale'])) {
 			$_SESSION['ay']['facebook'][$this->app_id]['user']['locale'] = $this->signed_request['user']['locale'];
@@ -48,8 +52,9 @@ class Facebook {
 			
 				return $this->api($path, $parameters, $post);
 			} else {
-				throw $e;
+				
 			}*/
+			throw $e;
 		}
 	}
 	
@@ -73,7 +78,7 @@ class Facebook {
 		
 		parse_str($response, $access_token);
 		
-		$this->setAccessToken($access_token['access_token']);
+		$this->setUserAccessToken($access_token['access_token']);
 		
 		$access_token['expires'] += time();
 		
@@ -101,7 +106,7 @@ class Facebook {
 	}
 	
 	public function getAppAccessToken () {
-		return $this->app_id . '|' . $this->app_secrent;
+		return $this->app_id . '|' . $this->app_secret;
 	}
 	
 	private function getAppSecret () {
@@ -122,6 +127,10 @@ class Facebook {
 	
 	public function getUserAccessToken () {
 		return $this->user_access_token;
+	}
+	
+	public function getUserId () {
+		return $this->signed_request['user_id'];
 	}
 	
 	public function getUserLocale () {
@@ -196,6 +205,21 @@ class Facebook {
 		return $url;
 	}
 	
+	private function getAccessTokenFromCode ($code, $redirect_url) {
+		$url = $this->makeRequestUrl('graph', 'oauth/access_token', [
+			'client_id' => $this->getAppId(),
+			'redirect_uri' => $redirect_url,
+			'client_secret' => $this->getAppSecret(),
+			'code' => $code
+		]);
+		
+		$response = $this->makeRequest($url);
+		
+		parse_str($response, $access_token);
+		
+		return $access_token;
+	}
+	
 	/**
 	 * Parse signed request and validate the signature. Signed request is received when loading app in the Facebook Page frame.
 	 *
@@ -203,6 +227,9 @@ class Facebook {
 	 */
 	private function parseSignedRequest ($raw_signed_request) {
 		$signed_request = [];
+		
+		// Prevent session cache in case of an error.
+		unset($_SESSION['ay']['facebook'][$this->app_id]['signed_request']);
 		
 		list($signed_request['encoded_sig'], $signed_request['payload']) = explode('.', $raw_signed_request, 2);
 		
@@ -222,8 +249,27 @@ class Facebook {
 			throw new Facebook_Exception('Unrecognised algorithm. Expected HMAC-SHA256.');
 		}
 		
+		// This signed_request did not provide oauth_token (e.g. if signed_request is retrieved from FB.getLoginStatus).
+		if (isset($signed_request['payload']['code'])) {
+			// Don't irritate Facebook with repeated lookups.
+			if (!isset($_SESSION['ay']['facebook'][$this->app_id]['_code']) || $_SESSION['ay']['facebook'][$this->app_id]['_code']['code'] !== $signed_request['payload']['code']) {
+				$access_token = $this->getAccessTokenFromCode($signed_request['payload']['code'], '');
+				
+				$_SESSION['ay']['facebook'][$this->app_id]['_code'] = [
+					'code' => $signed_request['payload']['code'],
+					'oauth_token' => $access_token['access_token'],
+					'expires' => $_SERVER['REQUEST_TIME'] + $access_token['expires']
+				];
+			}
+			
+			$signed_request['payload']['oauth_token'] = $_SESSION['ay']['facebook'][$this->app_id]['_code']['oauth_token'];
+			$signed_request['payload']['expires'] = $_SESSION['ay']['facebook'][$this->app_id]['_code']['expires'];
+		}
+		
+		$_SESSION['ay']['facebook'][$this->app_id]['signed_request'] = $raw_signed_request;
+		
 		$this->signed_request = $signed_request['payload'];
-		$this->user_access_token = $_SESSION['ay']['facebook'][$this->app_id]['user']['access_token'] = $signed_request['payload']['oauth_token'];
+		$this->user_access_token = $signed_request['payload']['oauth_token'];
 	}
 	
 	/**
