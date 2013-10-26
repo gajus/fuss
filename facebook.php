@@ -130,7 +130,7 @@ class Facebook {
 	}
 	
 	public function getUserId () {
-		return $this->signed_request['user_id'];
+		return isset($this->signed_request['user_id']) ? $this->signed_request['user_id'] : null;
 	}
 	
 	public function getUserLocale () {
@@ -269,7 +269,7 @@ class Facebook {
 		$_SESSION['ay']['facebook'][$this->app_id]['signed_request'] = $raw_signed_request;
 		
 		$this->signed_request = $signed_request['payload'];
-		$this->user_access_token = $signed_request['payload']['oauth_token'];
+		$this->user_access_token = isset($signed_request['payload']['oauth_token']) ? $signed_request['payload']['oauth_token'] : null;		
 	}
 	
 	/**
