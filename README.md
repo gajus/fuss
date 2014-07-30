@@ -1,0 +1,1 @@
+This is a legacy release. This release is for internal use (http://anuary.com/) only. Future releases will have different API.

@@ -1,5 +1,5 @@
 <?php
-namespace ay\facebook;
+namespace Gajus\Facer;
 
 class Facebook {
 	private
@@ -44,7 +44,7 @@ class Facebook {
 			$url = $this->makeRequestUrl('graph', $path, $parameters);
 		
 			return $this->makeRequest($url, $post);
-		} catch (Facebook_Exception $e) {
+		} catch (Exception\FacebookException $e) {
 			// [OAuthException] Error validating access token: The session has been invalidated because the user has changed the password.
 			
 			/*if ($e->getCode() == 190 && !empty($this->access_token) && !empty($this->signed_request['oauth_token']) && $this->access_token != $this->signed_request['oauth_token']) {
@@ -64,7 +64,7 @@ class Facebook {
 		}
 		
 		if (empty($access_token)) {
-			throw new Facebook_Exception('Missing present access token.');
+			throw new Exception\FacebookException('Missing present access token.');
 		}
 	
 		$url = $this->makeRequestUrl('graph', 'oauth/access_token', [
@@ -166,7 +166,7 @@ class Facebook {
 		$result	= curl_exec($ch);
 		
 		if ($result === false) {
-			throw new Facebook_Exception('[' . curl_errno($ch) . '] ' . curl_error($ch));
+			throw new Exception\FacebookException('[' . curl_errno($ch) . '] ' . curl_error($ch));
 		}
 		
 		curl_close($ch);
@@ -177,7 +177,7 @@ class Facebook {
 			$result = $json;
 		
 			if (!empty($result['error'])) {
-				throw new Facebook_Exception('[' . $result['error']['type'] . '] ' . $result['error']['message'], empty($result['error']['code']) ? null : $result['error']['code']);
+				throw new Exception\FacebookException('[' . $result['error']['type'] . '] ' . $result['error']['message'], empty($result['error']['code']) ? null : $result['error']['code']);
 			}
 		}
 		
@@ -240,13 +240,13 @@ class Facebook {
 		$expected_signature = hash_hmac('sha256', $signed_request['payload'], $this->app_secret, true);
 		
 		if ($base64_decode($signed_request['encoded_sig']) !== $expected_signature) {
-			throw new Facebook_Exception('Invalid signature.');
+			throw new Exception\FacebookException('Invalid signature.');
 		}
 		
 		$signed_request['payload'] = json_decode($base64_decode($signed_request['payload']), true);
 		
 		if ($signed_request['payload']['algorithm'] !== 'HMAC-SHA256') {
-			throw new Facebook_Exception('Unrecognised algorithm. Expected HMAC-SHA256.');
+			throw new Exception\FacebookException('Unrecognised algorithm. Expected HMAC-SHA256.');
 		}
 		
 		// This signed_request did not provide oauth_token (e.g. if signed_request is retrieved from FB.getLoginStatus).
