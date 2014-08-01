@@ -1,9 +1,9 @@
 {
-    "name": "gajus/facer",
+    "name": "gajus/puss",
     "version": "0.0.1",
     "description": "Facebook SDK for PHP provides interface to the Graph API.",
     "keywords": ["facebook", "sdk"],
-    "homepage": "https://github.com/gajus/facer",
+    "homepage": "https://github.com/gajus/puss",
     "type": "library",
     "license": "BSD-3-Clause",
     "authors": [
