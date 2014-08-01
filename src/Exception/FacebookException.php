@@ -1,4 +1,4 @@
 <?php
-namespace Gajus\Facebook;
+namespace Gajus\Puss;
 
 class FacebookException extends \Exception {}
