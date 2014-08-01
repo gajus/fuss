@@ -73,6 +73,8 @@ class App {
 			throw new Exception\FacebookException('Invalid signature.');
 		}
 
+		$signed_request['payload'] = json_decode(static::decodeBase64Url($signed_request['payload']), true);
+
 		return $signed_request;
 
 
