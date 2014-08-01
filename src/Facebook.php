@@ -3,9 +3,6 @@ namespace Gajus\Puss;
 
 class Facebook {
 	private
-		/**
-		 *
-		 */
 		$app_id,
 		$app_secret,
 		$signed_request,
@@ -102,6 +99,26 @@ class Facebook {
 		}
 	
 		return $access_token;
+	}
+	
+	public function getAppId () {
+		return $this->app_id;
+	}
+	
+	public function getAppAccessToken () {
+		return $this->app_id . '|' . $this->app_secret;
+	}
+	
+	private function getAppSecret () {
+		return $this->app_secret;
+	}
+	
+	/**
+	 * This is used to prevent CSRF access_token reuse as described in
+	 * https://developers.facebook.com/docs/reference/api/securing-graph-api/
+	 */
+	private function getAppSecretProof () {
+		return hash_hmac('sha256', $this->getAccessToken(), $this->getAppSecret());
 	}
 	
 	public function getSignedRequest () {
