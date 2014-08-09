@@ -5,6 +5,6 @@ namespace Gajus\Puss\Exception;
  * @link https://github.com/gajus/puss for the canonical source repository
  * @license https://github.com/gajus/puss/blob/master/LICENSE BSD 3-Clause
  */
-class FacebookException extends PussException {
+class PussException extends \Exception {
     
 }

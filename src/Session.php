@@ -1,10 +1,11 @@
 <?php
-namespace Gajus\Puss\Exception;
+namespace Gajus\Puss;
 
 /**
  * @link https://github.com/gajus/puss for the canonical source repository
  * @license https://github.com/gajus/puss/blob/master/LICENSE BSD 3-Clause
  */
-class FacebookException extends PussException {
-    
+interface Session {
+	public function getSecret ();
+	public function getAccessToken ();
 }
