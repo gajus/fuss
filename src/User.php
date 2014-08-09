@@ -12,6 +12,10 @@ class User implements Session {
 		 */
 		$app,
 		/**
+		 * @var array
+		 */
+		$id,
+		/**
 		 * @var Gajus\Puss\AccessToken
 		 */
 		$access_token;
@@ -27,8 +31,17 @@ class User implements Session {
 	 * @param Gajus\Puss\AccessToken $access_token
 	 * @return null
 	 */
-	public function setAccessToken (Gajus\Puss\AccessToken $access_token) {
+	public function setAccessToken (\Gajus\Puss\AccessToken $access_token) {
 		$this->access_token = $access_token;
+
+		$request = new \Gajus\Puss\Request($this, 'me');
+        $request->setQuery(['fields' => 'id']);
+        
+        $response = $request->execute();
+
+        // @todo Check if it user access token, as oppose to page or whatever.
+
+        $this->id = $response['id'];
 	}
 
 	/**
@@ -40,16 +53,11 @@ class User implements Session {
 
 	/**
 	 * Get user ID.
-	 * As of Graph API v2, the user ID is app-scoped (https://developers.facebook.com/docs/apps/upgrading#upgrading_v2_0_user_ids).
-	 * 
+	 *
 	 * @return null|int Facebook user ID
 	 */
 	public function getId () {
-		$signed_request = $this->app->getSignedRequest();
-
-		if ($signed_request && $user_id = $signed_request->getUserId()) {
-			return $user_id;
-		}
+		return $this->id;
 	}
 
 	/**
@@ -64,30 +72,44 @@ class User implements Session {
 	 * 
 	 * @return array
 	 */
-	public function getMe () {
+	/*public function getMe () {
 		if ($this->access_token) {
 			throw new Exception\FacebookException('There is no access token.');
 		}
 
 		// @todo
-		$this->app->api('me');
-	}
+		#$this->app->api('me');
+	}*/
 
-	/*public function extendAccessToken ($access_token = null) {
-		if ($access_token === null) {
-			$access_token = $this->access_token;
-		}
-		
-		if (empty($access_token)) {
+	/**
+	 * 
+	 */
+	/*public function REMOVED () {
+		if (!$this->access_token) {
 			throw new Exception\FacebookException('Missing present access token.');
 		}
-	
-		$url = $this->makeRequestUrl('graph', 'oauth/access_token', [
-			'client_id' => $this->getAppId(),
-			'client_secret' => $this->getAppSecret(),
+
+		$request = new \Gajus\Puss\Request($this, 'me');
+        $request->setQuery([
+			'client_id' => $this->app->getId(),
+			'client_secret' => $this->app->getSecret(),
 			'grant_type' => 'fb_exchange_token',
-			'fb_exchange_token' => $access_token
+			'fb_exchange_token' => $this->access_token
 		]);
+        
+        $response = $request->execute();
+
+        die(var_dump( $response ));
+	
+
+
+
+
+
+
+
+
+		$url = $this->makeRequestUrl('graph', 'oauth/access_token', );
 		
 		$response = $this->makeRequest($url);
 		

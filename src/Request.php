@@ -6,6 +6,8 @@ namespace Gajus\Puss;
  * @license https://github.com/gajus/puss/blob/master/LICENSE BSD 3-Clause
  */
 class Request {
+	const VERSION = '0.0.1';
+
 	private
 		/**
 		 * @var Gajus\Puss\AccessToken
@@ -67,7 +69,7 @@ class Request {
 	public function getUrl () {
 		$url = 'https://graph.facebook.com/' . trim($this->path, '/');
 
-		$this->query['access_token'] = (string) $this->access_token;
+		$this->query['access_token'] = $this->access_token->getTextAccessToken();
 		$this->query['appsecret_proof'] = $this->getAppSecretProof();
 
 		// [GraphMethodException] API calls from the server require an appsecret_proof argument
@@ -90,7 +92,7 @@ class Request {
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_CONNECTTIMEOUT => 10,
 		    CURLOPT_TIMEOUT => 60,
-		    CURLOPT_USERAGENT => 'Puss',
+		    CURLOPT_USERAGENT => 'Puss/' . self::VERSION,
 		];
 		
 		if ($this->getMethod()) {
@@ -140,6 +142,6 @@ class Request {
      * @see https://developers.facebook.com/docs/reference/api/securing-graph-api/
      */
     private function getAppSecretProof () {
-       return hash_hmac('sha256', $this->session->getAccessToken(), $this->session->getSecret());
+       return hash_hmac('sha256', $this->session->getAccessToken()->getTextAccessToken(), $this->session->getSecret());
     }
 }

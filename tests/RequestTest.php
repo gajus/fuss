@@ -21,6 +21,9 @@ class RequestTest extends PHPUnit_Framework_TestCase {
         $this->user = new Gajus\Puss\User($this->app);
     }
 
+    public function testUserAgentVersion () {
+        $this->assertSame(json_decode(file_get_contents(__DIR__ . '/../composer.json'), true)['version'], Gajus\Puss\Request::VERSION);
+    }
 
     public function testGetUrl () {
         $request = new Gajus\Puss\Request($this->app);

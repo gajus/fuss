@@ -35,6 +35,15 @@ class AccessToken {
 		$this->access_token = $access_token;
 	}
 
+	public function getTextAccessToken () {
+		return $this->access_token;
+	}
+
+	/**
+	 * Verify that the access token is valid.
+	 *
+	 * @return null
+	 */
 	public function verify () {
 		$request = new Request($this->app, 'debug_token');
 		$request->setQuery(['input_token' => $this->access_token]);
@@ -69,6 +78,27 @@ class AccessToken {
 		$this->expires_at = $response['data']['expires_at'];
 		$this->scope = $response['data']['scopes'];
 	}
+
+	/**
+	 * 
+	 */
+	public function extendAccessToken () {
+		if (!$this->access_token) {
+			throw new Exception\FacebookException('Missing present access token.');
+		}
+
+		$request = new \Gajus\Puss\Request($this, 'me');
+        $request->setQuery([
+			'client_id' => $this->app->getId(),
+			'client_secret' => $this->app->getSecret(),
+			'grant_type' => 'fb_exchange_token',
+			'fb_exchange_token' => $this->access_token
+		]);
+        
+        $response = $request->execute();
+
+        die(var_dump( $response ));
+    }
 
 	// public function debug () {} https://developers.facebook.com/docs/facebook-login/access-tokens#debug
 
@@ -107,8 +137,4 @@ class AccessToken {
 
 		// user_access_token = oauth_token ???
 	}*/
-
-	public function __toString () {
-		return $this->access_token;
-	}
 }
