@@ -5,9 +5,5 @@ Puss
 [![Latest Stable Version](https://poser.pugx.org/gajus/puss/version.png)](https://packagist.org/packages/gajus/puss)
 [![License](https://poser.pugx.org/gajus/puss/license.png)](https://packagist.org/packages/gajus/puss)
 
+# App
 # User
-
-`User` can be initialized from:
-
-* `SignedRequset`
-* 

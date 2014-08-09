@@ -10,6 +10,10 @@ class Request {
 
 	private
 		/**
+		 * @var string
+		 */
+		$method = 'GET',
+		/**
 		 * @var Gajus\Puss\AccessToken
 		 */
 		$access_token,
@@ -42,6 +46,27 @@ class Request {
 	}
 
 	/**
+	 * Data will turn the request method into HTTP POST.
+	 *
+	 * @return string GET|POST
+	 */
+	public function getMethod () {
+		return $this->method;
+	}
+
+	/**
+	 * @param string $method GET|POST
+	 * @return null
+	 */
+	public function setMethod ($method) {
+		if ($method != 'GET' && $method != 'POST') {
+			throw new Exception\RequestException('Invalid request method.');
+		}
+
+		$this->method = $method;
+	}
+
+	/**
 	 * @param array $query
 	 * @return null
 	 */
@@ -55,21 +80,14 @@ class Request {
 	 */
 	public function setData (array $data) {
 		$this->data = $data;
-	}
 
-	/**
-	 * Data will turn the request method into HTTP POST.
-	 *
-	 * @return string GET|POST
-	 */
-	public function getMethod () {
-		return empty($this->data) ? 'GET' : 'POST';
+		$this->setMethod('POST');
 	}
 
 	public function getUrl () {
 		$url = 'https://graph.facebook.com/' . trim($this->path, '/');
 
-		$this->query['access_token'] = $this->access_token->getTextAccessToken();
+		$this->query['access_token'] = $this->access_token->getPlain();
 		$this->query['appsecret_proof'] = $this->getAppSecretProof();
 
 		// [GraphMethodException] API calls from the server require an appsecret_proof argument
@@ -82,8 +100,10 @@ class Request {
 	}
 
 	/**
+	 * 
+	 * @return array
 	 */
-	public function execute() {	
+	public function execute () {	
 		$ch = curl_init();
 		
 		$options = [
@@ -95,21 +115,21 @@ class Request {
 		    CURLOPT_USERAGENT => 'Puss/' . self::VERSION,
 		];
 		
-		if ($this->getMethod()) {
-
-		}
-
-		/*if ($data === true) {
+		if ($this->getMethod() === 'POST') {
 			$options[CURLOPT_POST] = true;
-		} else if($data !== null) {
-			foreach ($data as $k => $v) {
-				if (is_array($v)) {
-					$data[$k] = json_encode($p);
+
+			if ($this->data !== null) {
+				$data = $this->data;
+
+				foreach ($data as $k => $v) {
+					if (is_array($v)) {
+						$data[$k] = json_encode($p);
+					}
 				}
+				
+				$options[CURLOPT_POSTFIELDS] = $data;
 			}
-			
-			$options[CURLOPT_POSTFIELDS] = $data;
-		}*/
+		}
 		
 		curl_setopt_array($ch, $options);
 		
@@ -120,15 +140,22 @@ class Request {
 		}
 		
 		curl_close($ch);
+
+		// @todo Test handling of different response types.
 		
 		$json = json_decode($result, true);
-		
-		if ($json !== null) {
+
+		if (json_last_error() == JSON_ERROR_NONE) {
 			$result = $json;
 		
 			if (!empty($result['error'])) {
 				throw new Exception\RequestException('[' . $result['error']['type'] . '] ' . $result['error']['message'], empty($result['error']['code']) ? null : $result['error']['code']);
 			}
+		} else {
+			// The "oauth/access_token" endpoint will return string encoded data:
+			// "access_token=CAALpZBF9favMBALi6KuwmoXXo3gEoZCAKniV5xzdwZAUjCNZCZB0NyfZC76BcZCvLqcJyTWBwzj44VNep38uwiXiZBg7VJxwZAxE2uc9ORZA3ZCYbtMtddPdsTDUEtvCA7iAM0EFsmZBynTwZCw7a0mUBUuAddA3Es36p78VJrswdlvhpArVe2VWz14vO&expires=5184000"
+
+			parse_str($result, $result);
 		}
 		
 		return $result;
@@ -142,6 +169,6 @@ class Request {
      * @see https://developers.facebook.com/docs/reference/api/securing-graph-api/
      */
     private function getAppSecretProof () {
-       return hash_hmac('sha256', $this->session->getAccessToken()->getTextAccessToken(), $this->session->getSecret());
+       return hash_hmac('sha256', $this->session->getAccessToken()->getPlain(), $this->session->getSecret());
     }
 }

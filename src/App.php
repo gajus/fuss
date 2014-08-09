@@ -71,7 +71,7 @@ class App implements Session {
 	 * @return Gajus\Puss\AccessToken
 	 */
 	public function getAccessToken () {
-		return new AccessToken($this, $this->app_id . '|' . $this->app_secret);
+		return new AccessToken($this, $this->app_id . '|' . $this->app_secret, AccessToken::TYPE_APP);
 	}
 
 

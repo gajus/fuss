@@ -6,10 +6,9 @@ namespace Gajus\Puss;
  * @license https://github.com/gajus/puss/blob/master/LICENSE BSD 3-Clause
  */
 class AccessToken {
-	// @todo
-	#const TYPE_USER = 'USER';
-	#const TYPE_APP = 'APP';
-	#const TYPE_PAGE = 'PAGE';
+	const TYPE_USER = 'USER';
+	const TYPE_APP = 'APP';
+	const TYPE_PAGE = 'PAGE';
 
 	private
 		/**
@@ -21,73 +20,86 @@ class AccessToken {
 		 */
 		$access_token,
 		/**
+		 * @var Gajus\Puss\AccessToken::TYPE_USER|Gajus\Puss\AccessToken::TYPE_APP|Gajus\Puss\AccessToken::TYPE_PAGE
+		 */
+		$type,
+		/**
 		 * @var int
 		 */
-		$expires_at;
+		$expiration_timestamp,
+		/**
+		 * @var array
+		 */
+		$scope;
 
 	/**
 	 * @param Gajus\Puss\App
 	 * @param string $access_token
 	 * @param string $expires_at
 	 */
-	public function __construct ($app, $access_token) {
+	public function __construct ($app, $access_token, $type) {
 		$this->app = $app;
 		$this->access_token = $access_token;
-	}
+		$this->type = $type;
 
-	public function getTextAccessToken () {
-		return $this->access_token;
+		$this->debugToken();
 	}
 
 	/**
-	 * Verify that the access token is valid.
-	 *
 	 * @return null
 	 */
-	public function verify () {
-		$request = new Request($this->app, 'debug_token');
-		$request->setQuery(['input_token' => $this->access_token]);
-		
-		$response = $request->execute();
+	private function debugToken () {
+		if ($this->type != AccessToken::TYPE_APP) {
+			$request = new Request($this->app, 'debug_token');
+			$request->setQuery(['input_token' => $this->access_token]);
+			
+			$response = $request->execute();
 
-		if (!$response['data']['is_valid']) {
-			throw new Exception\AccessTokenException('Invalid Access Token. ' . $response['data']['error']['message']);
-		}
-
-		/*
-		if (isset($response['data']['expires_at']) && $response['data']['expires_at'] < time()) {
-			throw new Exception\AccessTokenException('Access Token expired.');
-		}
-
-		if (isset($response['data']['app_id']) && $response['data']['app_id'] !== $this->app->getId()) {
-			throw new Exception\AccessTokenException('Access Token does not belong to this app.');
-		}
-		*/
-
-		// @todo What if App is suppose to make an action on behalf of another user while this user is logged in?
-		/*if (isset($response['data']['user_id'])) {
-			$signed_request = $this->app->getSignedRequest();
-
-			if ($signed_request) {
-				if ($response['data']['user_id'] !== $signed_request->getUserId()) {
-					throw new Exception\AccessTokenException('Access Token does not belong to this app.');
-				}
+			if (!$response['data']['is_valid']) {
+				// @todo Distinguish
+				throw new Exception\AccessTokenException('Invalid Access Token. ' . $response['data']['error']['message']);
 			}
-		}*/
 
-		$this->expires_at = $response['data']['expires_at'];
-		$this->scope = $response['data']['scopes'];
+			if (isset($response['data']['expires_at'])) {
+				$this->expiration_timestamp = $response['data']['expires_at'];
+			}
+
+			if (isset($response['data']['scopes'])) {
+				$this->scope = $response['data']['scopes'];
+			}
+		}
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getExpirationTimestamp () {
+		return $this->expiration_timestamp;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getScope () {
+		return $this->scope;
+	}
+
+	/**
+	 * @return string Plain text access token.
+	 */
+	public function getPlain () {
+		return $this->access_token;
 	}
 
 	/**
 	 * 
 	 */
 	public function extendAccessToken () {
-		if (!$this->access_token) {
-			throw new Exception\FacebookException('Missing present access token.');
+		if ($this->type != self::TYPE_USER) {
+			throw new \Exception('Not implemented.');
 		}
 
-		$request = new \Gajus\Puss\Request($this, 'me');
+		$request = new \Gajus\Puss\Request($this->app, 'oauth/access_token');
         $request->setQuery([
 			'client_id' => $this->app->getId(),
 			'client_secret' => $this->app->getSecret(),
@@ -97,10 +109,10 @@ class AccessToken {
         
         $response = $request->execute();
 
-        die(var_dump( $response ));
-    }
+        $this->access_token = $response['access_token'];
 
-	// public function debug () {} https://developers.facebook.com/docs/facebook-login/access-tokens#debug
+        $this->debugToken();
+    }
 
 	/**
 	 * When code is received, it has to be exchanged for an access token.
