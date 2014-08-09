@@ -47,7 +47,9 @@ class User implements Session {
 	public function getId () {
 		$signed_request = $this->app->getSignedRequest();
 
-		return $signed_request && $signed_request->getUserId();
+		if ($signed_request && $user_id = $signed_request->getUserId()) {
+			return $user_id;
+		}
 	}
 
 	/**

@@ -12,9 +12,7 @@ class UserTest extends PHPUnit_Framework_TestCase {
 
         $user = new Gajus\Puss\User($app);
 
-        die(var_dump( $user->getId() ));
-
-        $this->assertSame('', $user->getId());
+        $this->assertSame(315224138638048, $user->getId());
     }
 
     public function testGetUserSecret () {
