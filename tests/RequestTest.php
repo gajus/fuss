@@ -107,6 +107,27 @@ class RequestTest extends PHPUnit_Framework_TestCase {
         ];
     }
 
+    public function testSetBody () {
+        $request = new Gajus\Puss\Request($this->app, 'POST', 'me');
+        $request->setBody(['foo' => 'bar']);
+
+        $reflection_class = new ReflectionClass('Gajus\Puss\Request');
+        $reflection_property = $reflection_class->getProperty('body');
+        $reflection_property->setAccessible(true);
+        $body = $reflection_property->getValue($request);
+
+        $this->assertSame(['foo' => 'bar'], $body);
+    }
+
+    /**
+     * @expectedException Gajus\Puss\Exception\RequestException
+     * @expectedExceptionMessage GET request method must not have body.
+     */
+    public function testSetBodyWithIncompatibleRequestMethod () {
+        $request = new Gajus\Puss\Request($this->app, 'GET', 'me');
+        $request->setBody(['foo' => 'bar']);
+    }
+
     /**
      * @dataProvider requestMethodProvider
      */

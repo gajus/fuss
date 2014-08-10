@@ -28,7 +28,7 @@ class Request {
 		/**
 		 * @var array
 		 */
-		$data = [];
+		$body = [];
 
 	/**
 	 * @param Gajus\Puss\Session $session
@@ -77,15 +77,15 @@ class Request {
 	}
 
 	/**
-	 * @param array $data
+	 * @param array $body
 	 * @return null
 	 */
-	public function setData (array $data) {
+	public function setBody (array $body) {
 		if ($this->getMethod() !== 'POST') {
 			throw new Exception\RequestException($this->getMethod() . ' request method must not have body.');
 		}
 
-		$this->data = $data;
+		$this->body = $body;
 	}
 
 	/**
@@ -124,16 +124,16 @@ class Request {
 		if ($this->getMethod() === 'POST') {
 			$options[CURLOPT_POST] = true;
 
-			if ($this->data !== null) {
-				$data = $this->data;
+			if ($this->body !== null) {
+				$body = $this->body;
 
-				foreach ($data as $k => $v) {
+				foreach ($body as $k => $v) {
 					if (is_array($v)) {
-						$data[$k] = json_encode($p);
+						$body[$k] = json_encode($p);
 					}
 				}
 				
-				$options[CURLOPT_POSTFIELDS] = $data;
+				$options[CURLOPT_POSTFIELDS] = $body;
 			}
 		}
 		
