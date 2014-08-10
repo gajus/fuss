@@ -45,6 +45,15 @@ class SignedRequest {
 	}
 
 	/**
+	 * Raw signed request.
+	 * 
+	 * @return array
+	 */
+	public function getData () {
+		return $this->signed_request;
+	}
+
+	/**
 	 * @return null|int
 	 */
 	public function getUserId () {

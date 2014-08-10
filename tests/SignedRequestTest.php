@@ -23,6 +23,12 @@ class SignedRequestTest extends PHPUnit_Framework_TestCase {
         new Gajus\Puss\SignedRequest($this->app, self::signData([], 'abc'), Gajus\Puss\SignedRequest::SOURCE_INPUT);
     }
 
+    public function testGetData () {
+        $signed_request = $this->makeSignedRequest(['foo' => 'bar']);
+
+        $this->assertNull(['foo' => 'bar'], $signed_request->getData());
+    }
+
     public function testGetUserId () {
         $signed_request = $this->makeSignedRequest([]);
 
