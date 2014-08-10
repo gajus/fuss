@@ -139,7 +139,7 @@ class Request {
 		
 		curl_setopt_array($ch, $options);
 		
-		$result	= curl_exec($ch);
+		$result = curl_exec($ch);
 		
 		if ($result === false) {
 			throw new Exception\RequestException('[' . curl_errno($ch) . '] ' . curl_error($ch));
