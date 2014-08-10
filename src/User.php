@@ -48,7 +48,7 @@ class User implements Session {
         
         $response = $request->make();
 
-        // @todo Check if it user access token, as oppose to page or whatever.
+        // @todo Check if it is user access token, as oppose to page or whatever.
 
         $this->id = $response['id'];
 	}
