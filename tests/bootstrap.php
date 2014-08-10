@@ -1,10 +1,15 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
-die(var_dump($_ENV, $GLOBALS, $_SERVER));
+if (isset($_SERVER['TRAVIS'])) {
+    die(var_dump( $_SERVER ));
 
-if (!file_exists(__DIR__ . '/config.php')) {
-    throw new \Exception('Cannot run tests without test app credentials. Rename config.php.dist to config.php.');
+    define('TEST_APP_ID', $_SERVER['TEST_APP_ID']);
+    define('TEST_APP_SECRET', $_SERVER['TEST_APP_SECRET']);
+} else {
+    if (!file_exists(__DIR__ . '/config.php')) {
+        throw new \Exception('Cannot run tests without test app credentials. Rename config.php.dist to config.php.');
+    }
+
+    require __DIR__ . '/config.php';
 }
-
-require __DIR__ . '/config.php';
