@@ -26,7 +26,7 @@ class SignedRequestTest extends PHPUnit_Framework_TestCase {
     public function testGetData () {
         $signed_request = $this->makeSignedRequest(['foo' => 'bar']);
 
-        $this->assertNull(['foo' => 'bar'], $signed_request->getData());
+        $this->assertSame(['foo' => 'bar'], $signed_request->getData());
     }
 
     public function testGetUserId () {
