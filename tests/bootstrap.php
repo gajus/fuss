@@ -2,8 +2,6 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 if (isset($_SERVER['TRAVIS'])) {
-    die(var_dump( $_SERVER ));
-
     define('TEST_APP_ID', $_SERVER['TEST_APP_ID']);
     define('TEST_APP_SECRET', $_SERVER['TEST_APP_SECRET']);
 } else {

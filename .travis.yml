@@ -7,7 +7,7 @@ php:
 
 env:
   global:
-    - secure: VydDF0hWytsswxggolRoAjOuYhW26XBXuG5zYrVUYVkHiF+wK3ZhuRV9V65xP0FNyLQqarLos6FJnMutBwzkpCCfVm0OJvzs+iqXt2PY5nyTbD2QeVdcFnpBvXpcMJ6u5FNq0+uP5zL0l5xYxMxzDUcqceVqWh8h049PtDv7RZc=
+    - secure: d3564fXGHgwY/A7njMzj4NyEEr2W8o3194Wn91jzWVSxeb296fUa7JWfoWoDezzGqhqkHnMdkGNnu6yZ06foZfz1QVVUs6/meV6Gz5jNpTNg0lQLpW/0m3EoQCaYObNcDf2TKpCtd5LFu0IoLst6+uHxOCSaAJcw4M92vLbNkA8=
 
 before_script:
   - travis_retry composer self-update
