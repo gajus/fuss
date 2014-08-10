@@ -5,6 +5,10 @@ php:
   - 5.5
   - 5.6
 
+env:
+  global:
+    - secure: QTbbd1YFTOXbJEQqEjwc1t32WRfKhm2q6QX7bSMsxiyRJCcXSP0lzgNJm+d010fjV/YiDdsiqRy8D2l3fwT2U//rhgAjIMfWfzGkD0vXnLo6G+jiUMZvbxTz89mGPVX9581owoljnRDlfQYI45+p5J/LG2lQK71tvIU9ZQgX704=
+
 before_script:
   - travis_retry composer self-update
   - travis_retry composer install --no-interaction --prefer-source --dev
