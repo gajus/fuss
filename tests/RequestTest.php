@@ -87,6 +87,27 @@ class RequestTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
+     * @dataProvider overwriteSessionQueryProvider
+     * @expectedException Gajus\Puss\Exception\RequestException
+     * @expectedExceptionMessage Cannot overwrite session parameters.
+     */
+    public function testOverwriteSessionQuery ($parameter_name) {
+        $request = new Gajus\Puss\Request($this->app, 'GET', 'me');
+
+        $query = [];
+        $query[$parameter_name] = '';
+
+        $request->setQuery($query);
+    }
+
+    public function overwriteSessionQueryProvider () {
+        return [
+            ['access_token'],
+            ['appsecret_proof']
+        ];
+    }
+
+    /**
      * @dataProvider requestMethodProvider
      */
     public function testRequestMethod ($method_name) {
