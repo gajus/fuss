@@ -50,6 +50,14 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
+     * @expectedException Gajus\Puss\Exception\AccessTokenException
+     * @expectedExceptionMessage Invalid Access Token. Invalid OAuth access token.
+     */
+    public function testInvalidAccessToken () {
+        new Gajus\Puss\AccessToken($this->app, '123', Gajus\Puss\AccessToken::TYPE_USER);
+    }
+
+    /**
      * @see https://developers.facebook.com/docs/facebook-login/access-tokens#termtokens
      */
     public function testExtendUserAccessToken () {
