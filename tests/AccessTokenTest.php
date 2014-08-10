@@ -17,11 +17,24 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
         $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
         foreach (self::$test_users as $test_user) {
-            $request = new Gajus\Puss\Request($app, $test_user['id']);
-            $request->setMethod('DELETE');
+            $request = new Gajus\Puss\Request($app, 'DELETE', $test_user['id']);
 
-            $request->execute();
+            $request->make();
         }
+    }
+
+    /**
+     * @param boolean $installed Automatically installs the app for the test user once it is created or associated.
+     */
+    private function createTestUser ($permissions = '') {
+        $request = new Gajus\Puss\Request($this->app, 'POST', 'app/accounts/test-users');
+        $request->setQuery(['permissions' => $permissions]);
+
+        $test_user = $request->make();
+
+        self::$test_users[] = $test_user;
+
+        return $test_user;
     }
 
     public function testGetPlain () {
@@ -43,9 +56,13 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
         $this->assertGreaterThan(3600, $access_token->getExpirationTimestamp() - time(), 'Short-term access token have a lifetime of at least 1 hour.');
         $this->assertLessThan(3600 * 2, $access_token->getExpirationTimestamp() - time(), 'Short-term access token have a lifetime of at most 2 hours.');
 
+        $this->assertFalse($access_token->isLong());
+
         $access_token->extend();
 
         $this->assertGreaterThan(86400 * 30, $access_token->getExpirationTimestamp() - time(), 'The long-term access token have a lifetime of at least 30 days.');
+
+        $this->assertTrue($access_token->isLong());
 
         return $access_token;
     }
@@ -70,14 +87,14 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
 
         // First we need to get the code using the long-lived access token.
         // @see https://developers.facebook.com/docs/facebook-login/access-tokens#long-via-code
-        $request = new Gajus\Puss\Request($user, 'oauth/client_code');
+        $request = new Gajus\Puss\Request($user, 'GET', 'oauth/client_code');
         $request->setQuery([
             'client_id' => \TEST_APP_ID,
             'client_secret' => \TEST_APP_SECRET,
             'redirect_uri' => ''
         ]);
 
-        $response = $request->execute();
+        $response = $request->make();
 
         $this->assertArrayHasKey('code', $response);
 
@@ -118,20 +135,5 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
         $this->assertContains('basic_info', $scope);
         $this->assertContains('email', $scope);
         $this->assertContains('user_friends', $scope);
-    }
-
-    /**
-     * @param boolean $installed Automatically installs the app for the test user once it is created or associated.
-     */
-    private function createTestUser ($permissions = '') {
-        $request = new Gajus\Puss\Request($this->app, 'app/accounts/test-users');
-        $request->setQuery(['permissions' => $permissions]);
-        $request->setMethod('POST');
-
-        $test_user = $request->execute();
-
-        self::$test_users[] = $test_user;
-
-        return $test_user;
     }
 }

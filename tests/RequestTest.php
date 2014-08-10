@@ -1,87 +1,139 @@
 <?php
 class RequestTest extends PHPUnit_Framework_TestCase {
-    const APP_ID = '820202914671347';
-    const APP_SECRET = 'a81411f4d1f8a341c8a97cc7d440c7d0';
-    const APP_ACCESS_TOKEN = '820202914671347|a81411f4d1f8a341c8a97cc7d440c7d0';
-    const APP_PROOF = 'fd335c4886c9d0a3f7c02e2205c1cbccd4860a48b381c35d5a56f293651d3833';
-
     private
         /**
          * @var Gajus\Puss\App
          */
-        $app,
-        /**
-         * @var Gajus\Puss\User
-         */
-        $user;
+        $app;
 
+    static private
+        $test_users = [];
 
     public function setUp () {
-        $this->app = new Gajus\Puss\App(static::APP_ID, static::APP_SECRET);
-        $this->user = new Gajus\Puss\User($this->app);
+        $this->app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+    }
+
+    /**
+     * Delete all test users after running the test class.
+     */
+    static public function tearDownAfterClass () {
+        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+
+        foreach (self::$test_users as $test_user) {
+            $request = new Gajus\Puss\Request($app, 'DELETE', $test_user['id']);
+
+            $request->make();
+        }
+    }
+
+    /**
+     * @param boolean $installed Automatically installs the app for the test user once it is created or associated.
+     */
+    private function createTestUser ($permissions = '') {
+        $request = new Gajus\Puss\Request($this->app, 'POST', 'app/accounts/test-users');
+        $request->setQuery(['permissions' => $permissions]);
+
+        $test_user = $request->make();
+
+        self::$test_users[] = $test_user;
+
+        return $test_user;
     }
 
     public function testUserAgentVersion () {
-        $this->assertSame(json_decode(file_get_contents(__DIR__ . '/../composer.json'), true)['version'], Gajus\Puss\Request::VERSION);
+        $this->assertSame(json_decode(file_get_contents(__DIR__ . '/../composer.json'), true)['version'], Gajus\Puss\Request::AGENT_VERSION);
     }
 
-    public function testGetUrl () {
-        $request = new Gajus\Puss\Request($this->app);
+    public function testGetAppUrl () {
+        $request = new Gajus\Puss\Request($this->app, 'GET', 'app');
 
-        $this->assertSame('https://graph.facebook.com/?access_token=' . urlencode(static::APP_ACCESS_TOKEN) . '&appsecret_proof=' . static::APP_PROOF, $request->getUrl());
+        $access_token = $this->app->getAccessToken()->getPlain();
+
+        $this->assertSame('https://graph.facebook.com/app?access_token=' . urlencode($access_token) . '&appsecret_proof=' . self::getAppSecretProof($access_token), $request->getUrl());
     }
 
-    public function testGetUrlWithPath () {
-        $request = new Gajus\Puss\Request($this->app, 'test');
+    public function testGetUserUrl () {
+        $access_token = $this->createTestUser()['access_token'];
 
-        $this->assertSame('https://graph.facebook.com/test?access_token=' . urlencode(static::APP_ACCESS_TOKEN) . '&appsecret_proof=' . static::APP_PROOF, $request->getUrl());
+        $user = new Gajus\Puss\User($this->app);
+        $user->setAccessToken(new Gajus\Puss\AccessToken($this->app, $access_token, Gajus\Puss\AccessToken::TYPE_USER));
+
+        $request = new Gajus\Puss\Request($user, 'GET', 'me');
+
+        $this->assertSame('https://graph.facebook.com/me?access_token=' . urlencode($access_token) . '&appsecret_proof=' . self::getAppSecretProof($access_token), $request->getUrl());
+    }
+
+    /**
+     * @expectedException Gajus\Puss\Exception\RequestException
+     * @expectedExceptionMessage Access token is not present.
+     */
+    public function testInvalidSession () {
+        $user = new Gajus\Puss\User($this->app);
+        
+        new Gajus\Puss\Request($user, 'GET', 'me');
     }
 
     public function testGetUrlWithQuery () {
-        $request = new Gajus\Puss\Request($this->app);
+        $request = new Gajus\Puss\Request($this->app, 'GET', 'me');
         $request->setQuery(['a' => 'b']);
 
-        $this->assertSame('https://graph.facebook.com/?a=b&access_token=' . urlencode(static::APP_ACCESS_TOKEN) . '&appsecret_proof=' . static::APP_PROOF, $request->getUrl());
+        $access_token = $this->app->getAccessToken()->getPlain();
+
+        $this->assertSame('https://graph.facebook.com/me?a=b&access_token=' . urlencode($access_token) . '&appsecret_proof=' . self::getAppSecretProof($access_token), $request->getUrl());
     }
 
-    public function testRequestMethod () {
-        $request = new Gajus\Puss\Request($this->app);
+    /**
+     * @dataProvider requestMethodProvider
+     */
+    public function testRequestMethod ($method_name) {
+        $request = new Gajus\Puss\Request($this->app, $method_name, 'me');
 
-        $this->assertSame('GET', $request->getMethod(), 'Request without data must be GET. #1');
+        $this->assertSame($method_name, $request->getMethod());
+    }
 
-        $request->setQuery(['a' => 'b']);
+    public function requestMethodProvider () {
+        return [
+            ['GET'],
+            ['POST'],
+            ['DELETE']
+        ];
+    }
 
-        $this->assertSame('GET', $request->getMethod(), 'Request without data must be GET. #2');
+    /**
+     * @expectedException Gajus\Puss\Exception\RequestException
+     * @expectedExceptionMessage Invalid request method.
+     */
+    public function testInvalidRequestMethod () {
+        new Gajus\Puss\Request($this->app, 'TEST', 'me');
+    }
 
-        $request->setData(['a' => 'b']);
+    /**
+     * @expectedException Gajus\Puss\Exception\RequestException
+     * @expectedExceptionMessage Path must not have hard-coded query parameters.
+     */
+    public function testExecuteInvalidRequestPath () {
+        new Gajus\Puss\Request($this->app, 'GET', 'me?foo=bar');
+    }
 
-        $this->assertSame('POST', $request->getMethod(), 'Request with data must be POST.');
+    public function testMakeRequest () {
+        $request = new Gajus\Puss\Request($this->app, 'GET', 'app');
+
+        $response = $request->make();
+
+        $this->assertSame(\TEST_APP_ID, $response['id']);
     }
 
     /**
      * @expectedException Gajus\Puss\Exception\RequestException
      * @expectedExceptionMessage [OAuthException] (#803) Some of the aliases you requested do not exist: 4o4
      */
-    public function testExecuteInvalidRequestPath () {
-        $request = new Gajus\Puss\Request($this->app, '4o4');
-        $response = $request->execute();
+    public function testMakeInvalidRequestPath () {
+        $request = new Gajus\Puss\Request($this->app, 'GET', '4o4');
+        
+        $request->make();
     }
 
-    /**
-     * @expectedException Gajus\Puss\Exception\RequestException
-     * @expectedExceptionMessage [OAuthException] Invalid OAuth access token signature.
-     */
-    public function testExecuteInvalidAccessToken () {
-        $app = new Gajus\Puss\App(static::APP_ID, substr_replace(static::APP_SECRET, 'oooooo', 0, 6));
-
-        $request = new Gajus\Puss\Request($app);
-        $response = $request->execute();
-    }
-
-    public function testExecuteResponse () {
-        $request = new Gajus\Puss\Request($this->app, 'app');
-        $response = $request->execute();
-
-        $this->assertSame(static::APP_ID, $response['id']);
+    static private function getAppSecretProof ($access_token) {
+       return hash_hmac('sha256', $access_token, \TEST_APP_SECRET);
     }
 }

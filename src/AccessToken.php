@@ -49,15 +49,26 @@ class AccessToken {
 		$this->debugToken();
 	}
 
+
+	/**
+	 * The issued_at field is not returned for short-lived access tokens.
+	 * 
+	 * @see https://developers.facebook.com/docs/facebook-login/access-tokens#debug
+	 * @return boolean
+	 */
+	public function isLong () {
+		return !!$this->issued_at;
+	}
+
 	/**
 	 * @return null
 	 */
 	private function debugToken () {
 		if ($this->type != AccessToken::TYPE_APP) {
-			$request = new Request($this->app, 'debug_token');
+			$request = new \Gajus\Puss\Request($this->app, 'GET', 'debug_token');
 			$request->setQuery(['input_token' => $this->access_token]);
 			
-			$response = $request->execute();
+			$response = $request->make();
 
 			if (!$response['data']['is_valid']) {
 				// @todo Distinguish
@@ -94,7 +105,7 @@ class AccessToken {
 	}
 
 	/**
-	 * @return string Plain text access token.
+	 * @return string The access token as a string.
 	 */
 	public function getPlain () {
 		return $this->access_token;
@@ -111,13 +122,11 @@ class AccessToken {
 			throw new Exception\AccessTokenException('Only user access token can be extended.');
 		}
 
-		if ($this->issued_at) {
-			// The issued_at field is not returned for short-lived access tokens.
-			// @sse https://developers.facebook.com/docs/facebook-login/access-tokens#debug
+		if ($this->isLong()) {
 			throw new Exception\AccessTokenException('Long-lived access token cannot be extended.');
 		}
 
-		$request = new \Gajus\Puss\Request($this->app, 'oauth/access_token');
+		$request = new \Gajus\Puss\Request($this->app, 'GET', 'oauth/access_token');
         $request->setQuery([
 			'client_id' => $this->app->getId(),
 			'client_secret' => $this->app->getSecret(),
@@ -125,7 +134,7 @@ class AccessToken {
 			'fb_exchange_token' => $this->access_token
 		]);
         
-        $response = $request->execute();
+        $response = $request->make();
 
         $this->access_token = $response['access_token'];
 
@@ -141,7 +150,7 @@ class AccessToken {
 	 * @return Gajus\Puss\AccessToken
 	 */
 	static public function makeFromCode (\Gajus\Puss\App $app, $code, $redirect_url = '') {
-		$request = new \Gajus\Puss\Request($app, 'oauth/access_token');
+		$request = new \Gajus\Puss\Request($app, 'GET', 'oauth/access_token');
 		$request->setQuery([
 			'client_id' => $app->getId(),
 			'client_secret' => $app->getSecret(),
@@ -149,7 +158,7 @@ class AccessToken {
 			'code' => $code
 		]);
 
-		$response = $request->execute();
+		$response = $request->make();
 
 		return new \Gajus\Puss\AccessToken($app, $response['access_token'], \Gajus\Puss\AccessToken::TYPE_USER);
 	}

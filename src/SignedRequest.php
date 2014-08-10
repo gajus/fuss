@@ -78,7 +78,7 @@ class SignedRequest {
 	 * @see https://developers.facebook.com/docs/facebook-login/using-login-with-games
 	 * @see https://developers.facebook.com/docs/reference/login/signed-request
 	 * @param string $raw_signed_request
-	 * @return null
+	 * @return array
 	 */
 	private function parse ($raw_signed_request) {
 		$signed_request = [];
@@ -95,11 +95,13 @@ class SignedRequest {
 	}
 
 	/**
-	 * The incoming token is encoded using modified Base64 encoding for URL, where
+	 * The incoming token is encoded using modified base64 encoding for URL, where
 	 * +/ is replaced with -_ to avoid percent-encoded hexadecimal representation.
 	 * 
 	 * @see http://en.wikipedia.org/wiki/Base64#URL_applications
 	 * @see http://php.net/manual/en/function.base64-encode.php#103849
+	 * @param string $input
+	 * @return string
 	 */
 	static private function decodeBase64Url ($input) {
 		return base64_decode(str_pad(strtr($input, '-_', '+/'), strlen($input) % 4, '=', STR_PAD_RIGHT));
