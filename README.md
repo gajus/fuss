@@ -12,10 +12,10 @@ Puss
 
 The tests are automatically run using the [Travis-CI](https://travis-ci.org/gajus/puss) and secured app credentials.
 
-To run a test locally,
+To run the tests locally,
 
 1. Pull the repository using the [Composer](https://getcomposer.org/).
 2. Create `tests/config.php` from `tests/config.php.dist` and edit to add your credentials.
-3. Execute test cases using [PHPUnit](http://phpunit.de/).
+3. Execute the test script using the [PHPUnit](http://phpunit.de/).
 
-> You should be using a sandbox application for running the test cases.
+> You should be using a sandboxed application for running the tests.

@@ -7,15 +7,15 @@ namespace Gajus\Puss;
  */
 class SignedRequest {
 	/**
-	 * Indicates that the signed request was created using data from $_POST['signed_request'].
+	 * The signed request was created using data from $_POST['signed_request'].
 	 */
 	const SOURCE_POST = 'POST';
 	/**
-	 * Indicates that the signed request was created using data from $_SESSION['gajus']['puss'][{APP-ID}]['signed_request'].
+	 * The signed request was created using data from $_SESSION['gajus']['puss'][{APP-ID}]['signed_request'].
 	 */
 	const SOURCE_SESSION = 'SESSION';
 	/**
-	 * Indicates that the signed request was provided by the user (e.g. via FB.login).
+	 * The signed request was provided by the user (e.g. via FB.login).
 	 */
 	const SOURCE_INPUT = 'INPUT';
 
@@ -25,7 +25,7 @@ class SignedRequest {
 		 */
 		$app,
 		/**
-		 * @var Gajus\Puss\SignedRequest::SOURCE_POST|Gajus\Puss\SignedRequest::SOURCE_SESSION|Gajus\Puss\SignedRequest::SOURCE_INPUT
+		 * @var self::SOURCE_POST|self::SOURCE_SESSION|self::SOURCE_INPUT
 		 */
 		$source,
 		/**
@@ -36,7 +36,7 @@ class SignedRequest {
 	/**
 	 * @param string $raw_signed_request It is base64url encoded and signed with an HMAC version of your App Secret, based on the OAuth 2.0 spec.
 	 * @param Gajus\Puss\App $app
-	 * @param Gajus\Puss\SignedRequest::SOURCE_POST|Gajus\Puss\SignedRequest::SOURCE_SESSION|Gajus\Puss\SignedRequest::SOURCE_INPUT $source
+	 * @param self::SOURCE_POST|self::SOURCE_SESSION|self::SOURCE_INPUT $source
 	 */
 	public function __construct (App $app, $raw_signed_request, $source) {
 		$this->app = $app;
@@ -48,28 +48,28 @@ class SignedRequest {
 	 * @return null|int
 	 */
 	public function getUserId () {
-		return isset($this->signed_request['payload']['user_id']) ? (int) $this->signed_request['payload']['user_id'] : null;
+		return isset($this->signed_request['user_id']) ? (int) $this->signed_request['user_id'] : null;
 	}
 
 	/**
 	 * @return null|int
 	 */
 	public function getPageId () {
-		return isset($this->signed_request['payload']['page']['id']) ? (int) $this->signed_request['payload']['page']['id'] : null;
+		return isset($this->signed_request['page']['id']) ? (int) $this->signed_request['page']['id'] : null;
 	}
 
 	/**
 	 * @return null|string
 	 */
 	public function getAccessToken () {
-		return isset($this->signed_request['payload']['oauth_token']) ? $this->signed_request['payload']['oauth_token'] : null;
+		return isset($this->signed_request['oauth_token']) ? $this->signed_request['oauth_token'] : null;
 	}
 
 	/**
 	 * @return null|string
 	 */
 	public function getCode () {
-		return isset($this->signed_request['payload']['code']) ? $this->signed_request['payload']['code'] : null;
+		return isset($this->signed_request['code']) ? $this->signed_request['code'] : null;
 	}
 
 	/**
@@ -91,9 +91,7 @@ class SignedRequest {
 			throw new Exception\SignedRequestException('Invalid signature.');
 		}
 
-		$signed_request['payload'] = json_decode(static::decodeBase64Url($signed_request['payload']), true);
-
-		return $signed_request;
+		return json_decode(static::decodeBase64Url($signed_request['payload']), true);
 	}
 
 	/**
@@ -101,8 +99,9 @@ class SignedRequest {
 	 * +/ is replaced with -_ to avoid percent-encoded hexadecimal representation.
 	 * 
 	 * @see http://en.wikipedia.org/wiki/Base64#URL_applications
+	 * @see http://php.net/manual/en/function.base64-encode.php#103849
 	 */
 	static private function decodeBase64Url ($input) {
-		return base64_decode(strtr($input, '-_', '+/'));
+		return base64_decode(str_pad(strtr($input, '-_', '+/'), strlen($input) % 4, '=', STR_PAD_RIGHT));
 	}
 }

@@ -1,8 +1,5 @@
 <?php
 class SignedRequestTest extends PHPUnit_Framework_TestCase {
-    const APP_ID = '820202914671347';
-    const APP_SECRET = 'a81411f4d1f8a341c8a97cc7d440c7d0';
-
     private
         /**
          * @var Gajus\Puss\App
@@ -11,7 +8,7 @@ class SignedRequestTest extends PHPUnit_Framework_TestCase {
 
 
     public function setUp () {
-        $this->app = new Gajus\Puss\App(static::APP_ID, static::APP_SECRET);
+        $this->app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
     }
 
     /**
@@ -19,48 +16,70 @@ class SignedRequestTest extends PHPUnit_Framework_TestCase {
      * @exceptedExceptionMessage Invalid signature.
      */
     public function testInvalidSignature () {
-        $signed_request = new Gajus\Puss\SignedRequest($this->app, 'LAF5VLFt3ZJGY2ka5SaAJ91PET1YHpQDDwqBvanqrxs.123', Gajus\Puss\SignedRequest::SOURCE_INPUT);
+        new Gajus\Puss\SignedRequest($this->app, self::signData([], 'abc'), Gajus\Puss\SignedRequest::SOURCE_INPUT);
     }
 
-    public function testPageGetId () {
-        $signed_request = new Gajus\Puss\SignedRequest($this->app, 'LAF5VLFt3ZJGY2ka5SaAJ91PET1YHpQDDwqBvanqrxs.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImlzc3VlZF9hdCI6MTQwNjk3NjYzMCwicGFnZSI6eyJpZCI6IjE0MjY2Mjk0MjQ3NDY4NCIsImxpa2VkIjpmYWxzZSwiYWRtaW4iOmZhbHNlfSwidXNlciI6eyJjb3VudHJ5IjoibHQiLCJsb2NhbGUiOiJlbl9VUyIsImFnZSI6eyJtaW4iOjAsIm1heCI6MTJ9fX0', Gajus\Puss\SignedRequest::SOURCE_INPUT);
+    public function testGetUserId () {
+        $signed_request = $this->makeSignedRequest([]);
 
-        $this->assertSame(142662942474684, $signed_request->getPageId());
+        $this->assertNull($signed_request->getUserId(), 'User has not authorized the app.');
 
-        $signed_request = new Gajus\Puss\SignedRequest($this->app, 'aSX1Jmj9WZ-semd722-yBhihOq_ui3IJfFk-mNRTdv4.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImNvZGUiOiJBUUFDMWtBOTkzbkV4Z0VNQktISTYwRHMtS2F5SC1Dem9nZVVOY0VpbTU4TDY2OWVkR29mSHZCaDdWTG1FUVpFZkJQbXYzcDlVTG9XcERKQUJrYVFsSmpfU3hTX19QbEdjbFRaYk41RXJsRVVlTnVDU3Q1RlVDNWg1MWtoX2NkM2Radlp0QkdZdVd6eDVDdTVUSmhLOWxETlVONTVOUEFfRjhxeXhoZl9Rakw5S3VoMzBRNUpoX0JFX1hBRE1JQklpTmRfSkxQam9GeXRXOGFaUF81MmplNjhxdmRIb0xESW1lQXB4cExoc3JRNmVNNERWZHZCenJibFdDeGRTZk9ZTEhHa1Z0QW4xVnhlTGF2UDU0SWpGUEJVZXVrUVVFY242X1hRRFdsV2ZBZzZOMF9STGp6ZkVhUlVyLUo0cFAzZVpSRHk4NmdCTmhRLVJCU2duNjBoOHQ3RCIsImlzc3VlZF9hdCI6MTQwNjg5OTMzMiwidXNlcl9pZCI6IjE0NzM5NzU4MjYxODMyMDQifQ', Gajus\Puss\SignedRequest::SOURCE_INPUT);
+        $signed_request = $this->makeSignedRequest(['user_id' => 123]);
 
-        $this->assertNull($signed_request->getPageId());
+        $this->assertSame(123, $signed_request->getUserId(), 'User has authorized the app.');
     }
 
-    public function testUserNotLoggedIntoFacebook () {
-        $signed_request = new Gajus\Puss\SignedRequest($this->app, 'LAF5VLFt3ZJGY2ka5SaAJ91PET1YHpQDDwqBvanqrxs.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImlzc3VlZF9hdCI6MTQwNjk3NjYzMCwicGFnZSI6eyJpZCI6IjE0MjY2Mjk0MjQ3NDY4NCIsImxpa2VkIjpmYWxzZSwiYWRtaW4iOmZhbHNlfSwidXNlciI6eyJjb3VudHJ5IjoibHQiLCJsb2NhbGUiOiJlbl9VUyIsImFnZSI6eyJtaW4iOjAsIm1heCI6MTJ9fX0', Gajus\Puss\SignedRequest::SOURCE_INPUT);
+    public function testGetPageId () {
+        $signed_request = $this->makeSignedRequest([]);
 
-        $this->assertNull($signed_request->getUserId(), 'User ID must be null.');
-        $this->assertNull($signed_request->getAccessToken(), 'Access Token must be null');
-        $this->assertNull($signed_request->getCode(), 'Code must be null');
+        $this->assertNull($signed_request->getPageId(), 'Signed request is coming not from canvas.');
+
+        $signed_request = $this->makeSignedRequest(['page' => ['id' => 123]]);
+
+        $this->assertSame(123, $signed_request->getPageId(), 'Signed request is coming from canvas.');
     }
 
-    public function testUserNotAuthorisedApp () {
-        $signed_request = new Gajus\Puss\SignedRequest($this->app, 'Ojr0tyYd35uaWSFFuM50F1pP2HiOrY-IZAws1Bknybw.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImlzc3VlZF9hdCI6MTQwNjg5NTgzNCwicGFnZSI6eyJpZCI6IjE0MjY2Mjk0MjQ3NDY4NCIsImxpa2VkIjpmYWxzZSwiYWRtaW4iOmZhbHNlfSwidXNlciI6eyJjb3VudHJ5IjoibHQiLCJsb2NhbGUiOiJlbl9VUyIsImFnZSI6eyJtaW4iOjIxfX19', Gajus\Puss\SignedRequest::SOURCE_INPUT);
+    public function testGetAccessToken () {
+        $signed_request = $this->makeSignedRequest([]);
 
-        $this->assertNull($signed_request->getUserId(), 'User ID must be null.');
-        $this->assertNull($signed_request->getAccessToken(), 'Access Token must be null');
-        $this->assertNull($signed_request->getCode(), 'Code must be null');
+        $this->assertNull($signed_request->getAccessToken());
+
+        $signed_request = $this->makeSignedRequest(['oauth_token' => 'abc']);
+
+        $this->assertSame('abc', $signed_request->getAccessToken());
     }
 
-    public function testUserAuthorisedWithAccessToken () {
-        $signed_request = new Gajus\Puss\SignedRequest($this->app, 'u9I7E42ljSn8erZQo9ZjJMwvvInmoSK5bC4zABKBsr4.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImV4cGlyZXMiOjE0MDY5MDE2MDAsImlzc3VlZF9hdCI6MTQwNjg5NjEyMSwib2F1dGhfdG9rZW4iOiJDQUFMcFpCRjlmYXZNQkFKeTBJRlNhNGJjRzlaQXB2MWZPMVpCYmY5TnVYZmRnZW0wVGlmWXdhVUNJcm9aQnhZRG03aVpCQkVOUjBWRDVDWTRCMEw2NmJ3RjFEWkNNUERTdG1vcHlOclIwM1JmcWsxaDgxQmNjd3BidTFTUEFTRlhUNUE5dHpNSzAzMlMxZ1dPOHVBSHhaQlJaQlJzcFZKMERqZjNWbUc4YVYycnFZQnJiZW5Sc0hOUE9wZFREU1pCeTZsTlNLdVNwNXVmUXFhTEFVcW53cjRRWkJzNmJDMGpoQzc2Z1pEIiwicGFnZSI6eyJpZCI6IjE0MjY2Mjk0MjQ3NDY4NCIsImxpa2VkIjpmYWxzZSwiYWRtaW4iOmZhbHNlfSwidXNlciI6eyJjb3VudHJ5IjoibHQiLCJsb2NhbGUiOiJlbl9VUyIsImFnZSI6eyJtaW4iOjIxfX0sInVzZXJfaWQiOiIzMTUyMjQxMzg2MzgwNDgifQ', Gajus\Puss\SignedRequest::SOURCE_INPUT);
+    public function testGetCode () {
+        $signed_request = $this->makeSignedRequest([]);
 
-        $this->assertSame(315224138638048, $signed_request->getUserId(), 'User ID.');
-        $this->assertSame('CAALpZBF9favMBAJy0IFSa4bcG9ZApv1fO1ZBbf9NuXfdgem0TifYwaUCIroZBxYDm7iZBBENR0VD5CY4B0L66bwF1DZCMPDStmopyNrR03Rfqk1h81Bccwpbu1SPASFXT5A9tzMK032S1gWO8uAHxZBRZBRspVJ0Djf3VmG8aV2rqYBrbenRsHNPOpdTDSZBy6lNSKuSp5ufQqaLAUqnwr4QZBs6bC0jhC76gZD', $signed_request->getAccessToken(), 'Access token.');
-        $this->assertNull($signed_request->getCode(), 'Code must be null');
+        $this->assertNull($signed_request->getCode());
+
+        $signed_request = $this->makeSignedRequest(['code' => 'abc']);
+
+        $this->assertSame('abc', $signed_request->getCode());
     }
 
-    public function testUserAuthorisedWithCode () {
-        $signed_request = new Gajus\Puss\SignedRequest($this->app, 'aSX1Jmj9WZ-semd722-yBhihOq_ui3IJfFk-mNRTdv4.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImNvZGUiOiJBUUFDMWtBOTkzbkV4Z0VNQktISTYwRHMtS2F5SC1Dem9nZVVOY0VpbTU4TDY2OWVkR29mSHZCaDdWTG1FUVpFZkJQbXYzcDlVTG9XcERKQUJrYVFsSmpfU3hTX19QbEdjbFRaYk41RXJsRVVlTnVDU3Q1RlVDNWg1MWtoX2NkM2Radlp0QkdZdVd6eDVDdTVUSmhLOWxETlVONTVOUEFfRjhxeXhoZl9Rakw5S3VoMzBRNUpoX0JFX1hBRE1JQklpTmRfSkxQam9GeXRXOGFaUF81MmplNjhxdmRIb0xESW1lQXB4cExoc3JRNmVNNERWZHZCenJibFdDeGRTZk9ZTEhHa1Z0QW4xVnhlTGF2UDU0SWpGUEJVZXVrUVVFY242X1hRRFdsV2ZBZzZOMF9STGp6ZkVhUlVyLUo0cFAzZVpSRHk4NmdCTmhRLVJCU2duNjBoOHQ3RCIsImlzc3VlZF9hdCI6MTQwNjg5OTMzMiwidXNlcl9pZCI6IjE0NzM5NzU4MjYxODMyMDQifQ', Gajus\Puss\SignedRequest::SOURCE_INPUT);
+    private function makeSignedRequest (array $data) {
+        return new Gajus\Puss\SignedRequest($this->app, self::signData($data), Gajus\Puss\SignedRequest::SOURCE_INPUT);
+    }
 
-        $this->assertSame(1473975826183204, $signed_request->getUserId(), 'User ID.');
-        $this->assertNull($signed_request->getAccessToken(), 'Access Token must be null');
-        $this->assertSame('AQAC1kA993nExgEMBKHI60Ds-KayH-CzogeUNcEim58L669edGofHvBh7VLmEQZEfBPmv3p9ULoWpDJABkaQlJj_SxS__PlGclTZbN5ErlEUeNuCSt5FUC5h51kh_cd3dZvZtBGYuWzx5Cu5TJhK9lDNUN55NPA_F8qyxhf_QjL9Kuh30Q5Jh_BE_XADMIBIiNd_JLPjoFytW8aZP_52je68qvdHoLDImeApxpLhsrQ6eM4DVdvBzrblWCxdSfOYLHGkVtAn1VxeLavP54IjFPBUeukQUEcn6_XQDWlWfAg6N0_RLjzfEaRUr-J4pP3eZRDy86gBNhQ-RBSgn60h8t7D', $signed_request->getCode(), 'Code.');
+    static private function signData (array $data, $secret = null) {
+        if ($secret === null) {
+            $secret = \TEST_APP_SECRET;
+        }
+
+        $data = json_encode($data, \JSON_UNESCAPED_SLASHES);
+        $encoded_data = self::encodeBase64Url($data);
+        $encoded_signature = self::encodeBase64Url(hash_hmac('sha256', $encoded_data, $secret, true));
+
+        return $encoded_signature . '.' . $encoded_data;
+    }
+
+    static private function encodeBase64Url ($input) {
+        return rtrim(strtr(base64_encode($input), '+/', '-_'), '=');
+    }
+
+    static private function decodeBase64Url ($input) {
+        return base64_decode(str_pad(strtr($input, '-_', '+/'), strlen($input) % 4, '=', STR_PAD_RIGHT)); 
     }
 }

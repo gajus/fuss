@@ -20,7 +20,7 @@ class AccessToken {
 		 */
 		$access_token,
 		/**
-		 * @var Gajus\Puss\AccessToken::TYPE_USER|Gajus\Puss\AccessToken::TYPE_APP|Gajus\Puss\AccessToken::TYPE_PAGE
+		 * @var self::TYPE_USER|self::TYPE_APP|self::TYPE_PAGE
 		 */
 		$type,
 		/**
@@ -37,9 +37,9 @@ class AccessToken {
 		$scope;
 
 	/**
-	 * @param Gajus\Puss\App
-	 * @param string $access_token
-	 * @param string $expires_at
+	 * @param Gajus\Puss\App $app
+	 * @param string $access_token A string that identifies a user, app, or page and can be used by the app to make graph API calls.
+	 * @param self::TYPE_USER|self::TYPE_APP|self::TYPE_PAGE $type
 	 */
 	public function __construct ($app, $access_token, $type) {
 		$this->app = $app;
@@ -86,7 +86,8 @@ class AccessToken {
 	}
 
 	/**
-	 * @return array
+	 * @see https://developers.facebook.com/docs/facebook-login/permissions/v2.1 
+	 * @return array Permissions granted to the access token.
 	 */
 	public function getScope () {
 		return $this->scope;
@@ -100,16 +101,18 @@ class AccessToken {
 	}
 
 	/**
+	 * Extend a short-lived access token for a long-lived access token.
+	 * 
 	 * @see https://developers.facebook.com/docs/facebook-login/access-tokens#extending
+	 * @return null
 	 */
 	public function extend () {
 		if ($this->type != self::TYPE_USER) {
-			// @todo
-			throw new Exception\AccessTokenException('Not implemented.');
+			throw new Exception\AccessTokenException('Only user access token can be extended.');
 		}
 
 		if ($this->issued_at) {
-			// Note that the issued_at field is not returned for short-lived access tokens.
+			// The issued_at field is not returned for short-lived access tokens.
 			// @sse https://developers.facebook.com/docs/facebook-login/access-tokens#debug
 			throw new Exception\AccessTokenException('Long-lived access token cannot be extended.');
 		}
@@ -130,14 +133,14 @@ class AccessToken {
     }
 
 	/**
-	 * When code is received, it has to be exchanged for an access token.
+	 * Exchange code for an access token.
 	 *
 	 * @see https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/v2.0#exchangecode
 	 * @param string $code The parameter received from the Login Dialog.
 	 * @param string $redirect_url This argument is required and must be the same as the original request_uri that you used when starting the OAuth login process. In case of FB.login, it is empty string.
 	 * @return Gajus\Puss\AccessToken
 	 */
-	static public function exchangeCodeForAccessToken (\Gajus\Puss\App $app, $code, $redirect_url = '') {
+	static public function makeFromCode (\Gajus\Puss\App $app, $code, $redirect_url = '') {
 		$request = new \Gajus\Puss\Request($app, 'oauth/access_token');
 		$request->setQuery([
 			'client_id' => $app->getId(),

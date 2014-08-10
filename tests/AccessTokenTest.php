@@ -10,6 +10,9 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
         $this->app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
     }
 
+    /**
+     * Delete all test users after running the test class.
+     */
     static public function tearDownAfterClass () {
         $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
@@ -19,6 +22,14 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
 
             $request->execute();
         }
+    }
+
+    public function testGetPlain () {
+        $user = $this->createTestUser();
+
+        $access_token = new Gajus\Puss\AccessToken($this->app, $user['access_token'], Gajus\Puss\AccessToken::TYPE_USER);
+
+        $this->assertSame($user['access_token'], $access_token->getPlain());
     }
 
     /**
@@ -77,7 +88,7 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
      * @depends testExchageAccessTokenForCode
      */
     public function testExchageCodeForAccessToken ($code) {
-        $access_token = Gajus\Puss\AccessToken::exchangeCodeForAccessToken($this->app, $code);
+        $access_token = Gajus\Puss\AccessToken::makeFromCode($this->app, $code);
 
         $this->assertInstanceOf('Gajus\Puss\AccessToken', $access_token);
     }
