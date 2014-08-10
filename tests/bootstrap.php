@@ -1,5 +1,8 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
-define('TEST_APP_ID', '820202914671347');
-define('TEST_APP_SECRET', 'a81411f4d1f8a341c8a97cc7d440c7d0');
+if (!file_exists(__DIR__ . '/config.php')) {
+    throw new \Exception('Cannot run tests without test app credentials. Rename config.php.dist to config.php.');
+}
+
+require __DIR__ . '/config.php';

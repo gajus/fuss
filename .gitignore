@@ -1,4 +1,5 @@
-vendor/
-report/
 composer.lock
+phpunit.xml
+tests/config.php
+vendor/
 sandbox/
