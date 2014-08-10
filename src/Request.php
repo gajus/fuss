@@ -10,7 +10,7 @@ class Request {
 
 	private
 		/**
-		 * @var string
+		 * @var string GET|POST|DELETE
 		 */
 		$method = 'GET',
 		/**
@@ -59,7 +59,7 @@ class Request {
 	 * @return null
 	 */
 	public function setMethod ($method) {
-		if ($method != 'GET' && $method != 'POST') {
+		if ($method != 'GET' && $method != 'POST' && $method != 'DELETE') {
 			throw new Exception\RequestException('Invalid request method.');
 		}
 

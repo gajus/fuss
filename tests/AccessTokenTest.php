@@ -1,7 +1,20 @@
 <?php
 class AccessTokenTest extends PHPUnit_Framework_TestCase {    
+    private
+        $app,
+        $test_users = [];
+
     public function setUp () {
         $this->app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+    }
+
+    public function tearDown () {
+        foreach ($this->test_users as $test_user) {
+            $request = new Gajus\Puss\Request($this->app, $test_user['id']);
+            $request->setMethod('DELETE');
+
+            $request->execute();
+        }
     }
 
     /**
@@ -51,10 +64,14 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
      * @param boolean $installed Automatically installs the app for the test user once it is created or associated.
      */
     private function createTestUser ($permissions = '') {
-        $request = new Gajus\Puss\Request($this->app, \TEST_APP_ID . '/accounts/test-users');
+        $request = new Gajus\Puss\Request($this->app, 'app/accounts/test-users');
         $request->setQuery(['permissions' => $permissions]);
         $request->setMethod('POST');
 
-        return $request->execute();
+        $test_user = $request->execute();
+
+        $this->test_users[] = $test_user;
+
+        return $test_user;
     }
 }

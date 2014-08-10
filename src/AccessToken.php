@@ -92,7 +92,7 @@ class AccessToken {
 	}
 
 	/**
-	 * 
+	 * @see https://developers.facebook.com/docs/facebook-login/access-tokens#extending
 	 */
 	public function extendAccessToken () {
 		if ($this->type != self::TYPE_USER) {
