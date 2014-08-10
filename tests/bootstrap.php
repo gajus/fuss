@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
-die(var_dump($_ENV));
+die(var_dump($_ENV, $GLOBALS, $_SERVER));
 
 if (!file_exists(__DIR__ . '/config.php')) {
     throw new \Exception('Cannot run tests without test app credentials. Rename config.php.dist to config.php.');
