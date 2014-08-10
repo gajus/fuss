@@ -1,16 +1,20 @@
 <?php
 class AccessTokenTest extends PHPUnit_Framework_TestCase {    
     private
-        $app,
+        $app;
+
+    static private
         $test_users = [];
 
     public function setUp () {
         $this->app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
     }
 
-    public function tearDown () {
-        foreach ($this->test_users as $test_user) {
-            $request = new Gajus\Puss\Request($this->app, $test_user['id']);
+    static public function tearDownAfterClass () {
+        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+
+        foreach (self::$test_users as $test_user) {
+            $request = new Gajus\Puss\Request($app, $test_user['id']);
             $request->setMethod('DELETE');
 
             $request->execute();
@@ -28,9 +32,54 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
         $this->assertGreaterThan(3600, $access_token->getExpirationTimestamp() - time(), 'Short-term access token have a lifetime of at least 1 hour.');
         $this->assertLessThan(3600 * 2, $access_token->getExpirationTimestamp() - time(), 'Short-term access token have a lifetime of at most 2 hours.');
 
-        $access_token->extendAccessToken();
+        $access_token->extend();
 
         $this->assertGreaterThan(86400 * 30, $access_token->getExpirationTimestamp() - time(), 'The long-term access token have a lifetime of at least 30 days.');
+
+        return $access_token;
+    }
+
+    /**
+     * @depends testExtendUserAccessToken
+     * @expectedException Gajus\Puss\Exception\AccessTokenException
+     * @expectedExceptionMessage Long-lived access token cannot be extended.
+     */
+    public function testExtendLongLivedUserAccessToken (\Gajus\Puss\AccessToken $access_token) {
+        $access_token->extend();
+    }
+
+    /**
+     * @depends testExtendUserAccessToken
+     * @coversNothing
+     */
+    public function testExchageAccessTokenForCode (\Gajus\Puss\AccessToken $access_token) {
+        // The request must be made on behalf of the user (using user access_token).
+        $user = new Gajus\Puss\User($this->app);
+        $user->setAccessToken($access_token);
+
+        // First we need to get the code using the long-lived access token.
+        // @see https://developers.facebook.com/docs/facebook-login/access-tokens#long-via-code
+        $request = new Gajus\Puss\Request($user, 'oauth/client_code');
+        $request->setQuery([
+            'client_id' => \TEST_APP_ID,
+            'client_secret' => \TEST_APP_SECRET,
+            'redirect_uri' => ''
+        ]);
+
+        $response = $request->execute();
+
+        $this->assertArrayHasKey('code', $response);
+
+        return $response['code'];
+    }
+
+    /**
+     * @depends testExchageAccessTokenForCode
+     */
+    public function testExchageCodeForAccessToken ($code) {
+        $access_token = Gajus\Puss\AccessToken::exchangeCodeForAccessToken($this->app, $code);
+
+        $this->assertInstanceOf('Gajus\Puss\AccessToken', $access_token);
     }
 
     public function testDefaultScope () {
@@ -70,7 +119,7 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
 
         $test_user = $request->execute();
 
-        $this->test_users[] = $test_user;
+        self::$test_users[] = $test_user;
 
         return $test_user;
     }

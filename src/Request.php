@@ -71,6 +71,10 @@ class Request {
 	 * @return null
 	 */
 	public function setQuery (array $query) {
+		if (isset($query['access_token'], $query['appsecret_proof'])) {
+			throw new Exception\RequestException('Cannot overwrite access_token and/or appsecret_proof.');
+		}
+
 		$this->query = $query;
 	}
 

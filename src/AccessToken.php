@@ -26,7 +26,11 @@ class AccessToken {
 		/**
 		 * @var int
 		 */
-		$expiration_timestamp,
+		$issued_at,
+		/**
+		 * @var int
+		 */
+		$expires_at,
 		/**
 		 * @var array
 		 */
@@ -60,8 +64,12 @@ class AccessToken {
 				throw new Exception\AccessTokenException('Invalid Access Token. ' . $response['data']['error']['message']);
 			}
 
+			if (isset($response['data']['issued_at'])) {
+				$this->issued_at = $response['data']['issued_at'];
+			}
+
 			if (isset($response['data']['expires_at'])) {
-				$this->expiration_timestamp = $response['data']['expires_at'];
+				$this->expires_at = $response['data']['expires_at'];
 			}
 
 			if (isset($response['data']['scopes'])) {
@@ -74,7 +82,7 @@ class AccessToken {
 	 * @return int
 	 */
 	public function getExpirationTimestamp () {
-		return $this->expiration_timestamp;
+		return $this->expires_at;
 	}
 
 	/**
@@ -94,9 +102,16 @@ class AccessToken {
 	/**
 	 * @see https://developers.facebook.com/docs/facebook-login/access-tokens#extending
 	 */
-	public function extendAccessToken () {
+	public function extend () {
 		if ($this->type != self::TYPE_USER) {
-			throw new \Exception('Not implemented.');
+			// @todo
+			throw new Exception\AccessTokenException('Not implemented.');
+		}
+
+		if ($this->issued_at) {
+			// Note that the issued_at field is not returned for short-lived access tokens.
+			// @sse https://developers.facebook.com/docs/facebook-login/access-tokens#debug
+			throw new Exception\AccessTokenException('Long-lived access token cannot be extended.');
 		}
 
 		$request = new \Gajus\Puss\Request($this->app, 'oauth/access_token');
@@ -120,33 +135,19 @@ class AccessToken {
 	 * @see https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/v2.0#exchangecode
 	 * @param string $code The parameter received from the Login Dialog.
 	 * @param string $redirect_url This argument is required and must be the same as the original request_uri that you used when starting the OAuth login process. In case of FB.login, it is empty string.
-	 * @return $access_token
+	 * @return Gajus\Puss\AccessToken
 	 */
-	/*static public function exchangeCodeForAccessToken (\Gajus\Puss\App $app, $code, $redirect_url = '') {
-		$request = new Gajus\Puss\Http\Request($app);
-		$request->makeUrl('graph', 'oauth/access_token', [
+	static public function exchangeCodeForAccessToken (\Gajus\Puss\App $app, $code, $redirect_url = '') {
+		$request = new \Gajus\Puss\Request($app, 'oauth/access_token');
+		$request->setQuery([
 			'client_id' => $app->getId(),
 			'client_secret' => $app->getSecret(),
 			'redirect_uri' => $redirect_url,
 			'code' => $code
 		]);
 
-		
+		$response = $request->execute();
 
-		// @todo Handle error.
-		
-		$response = $this->makeRequest($url);
-		
-		parse_str($response, $access_token);
-		
-		return $access_token;
-
-		#if (isset($signed_request['payload']['code'])) {
-		#	$access_token = $this->exchangeCodeForAccessToken($signed_request['payload']['code'], '');
-			// $access_token['access_token']
-			// expires = $_SERVER['REQUEST_TIME'] + $access_token['expires']
-		#}
-
-		// user_access_token = oauth_token ???
-	}*/
+		return new \Gajus\Puss\AccessToken($app, $response['access_token'], \Gajus\Puss\AccessToken::TYPE_USER);
+	}
 }
