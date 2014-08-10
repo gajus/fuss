@@ -77,14 +77,4 @@ class App implements Session {
 	public function getAccessToken () {
 		return new AccessToken($this, $this->app_id . '|' . $this->app_secret, AccessToken::TYPE_APP);
 	}
-
-	/**
-	 * The incoming token is encoded using modified Base64 encoding for URL, where
-	 * +/ is replaced with -_ to avoid percent-encoded hexadecimal representation.
-	 * 
-	 * @see http://en.wikipedia.org/wiki/Base64#URL_applications
-	 */
-	static private function decodeBase64Url ($input) {
-		return base64_decode(strtr($input, '-_', '+/'));
-	}
 }
