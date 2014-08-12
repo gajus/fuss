@@ -7,15 +7,19 @@ namespace Gajus\Puss;
  */
 class SignedRequest {
 	/**
-	 * The signed request was created using data from $_POST['signed_request'].
+	 * The signed request from $_POST['signed_request'].
 	 */
 	const SOURCE_POST = 'POST';
 	/**
-	 * The signed request was created using data from $_SESSION['gajus']['puss'][{APP-ID}]['signed_request'].
+	 * The signed request from $_SESSION['gajus']['puss'][{APP-ID}]['signed_request'].
 	 */
 	const SOURCE_SESSION = 'SESSION';
 	/**
-	 * The signed request was provided by the user (e.g. via FB.login).
+	 * The signed request from cookie set from the Javascript SDK, $_COOKIE['fbsr_' {APP-ID}].
+	 */
+	const SOURCE_COOKIE = 'COOKIE';
+	/**
+	 * The signed request from user input (e.g. acquired via FB.login).
 	 */
 	const SOURCE_INPUT = 'INPUT';
 

@@ -4,38 +4,56 @@
  * @license https://github.com/gajus/puss/blob/master/LICENSE BSD 3-Clause
  */
 class AppTest extends PHPUnit_Framework_TestCase {
-    public function testGetId () {
-        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+    private
+        $app;
 
-        $this->assertSame(\TEST_APP_ID, $app->getId());
+    public function setUp () {
+        $this->app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+    }
+
+    public function testGetId () {
+        $this->assertSame(\TEST_APP_ID, $this->app->getId());
     }
 
     public function testGetSecret () {
-        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
-
-        $this->assertSame(\TEST_APP_SECRET, $app->getSecret());
+        $this->assertSame(\TEST_APP_SECRET, $this->app->getSecret());
     }
 
     public function testGetAccessToken () {
-        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
-
-        $this->assertSame(\TEST_APP_ID . '|' . \TEST_APP_SECRET, $app->getAccessToken()->getPlain());
+        $this->assertSame(\TEST_APP_ID . '|' . \TEST_APP_SECRET, $this->app->getAccessToken()->getPlain());
     }
 
     public function testAccessTokenIsCached () {
-        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
-        
-        $this->assertSame($app->getAccessToken(), $app->getAccessToken());
+        $this->assertSame($this->app->getAccessToken(), $this->app->getAccessToken());
     }
 
     public function testGetSignedRequestFromVoid () {
-        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
-
-        $this->assertNull($app->getSignedRequest());
+        $this->assertNull($this->app->getSignedRequest());
     }
 
     public function testGetSignedRequestFromPost () {
         $_POST['signed_request'] = self::signData(['foo' => 'bar']);
+
+        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+
+        $this->assertSame(['foo' => 'bar'], $app->getSignedRequest()->getData());
+    }
+
+    public function testSignedRequestFromPostIsCached () {
+        $this->assertFalse(isset($_SESSION['gajus']['puss'][\TEST_APP_ID]['signed_request']));
+
+        $signed_data = self::signData([]);
+
+        $_POST['signed_request'] = $signed_data;
+
+        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+
+        $this->assertTrue(isset($_SESSION['gajus']['puss'][\TEST_APP_ID]['signed_request']));
+        $this->assertSame($signed_data, $_SESSION['gajus']['puss'][\TEST_APP_ID]['signed_request']);
+    }
+
+    public function testGetSignedRequestFromCookie () {
+        $_COOKIE['fbsr_' . $this->app->getId()]= self::signData(['foo' => 'bar']);
 
         $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
@@ -48,19 +66,6 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
         $this->assertSame(['foo' => 'bar'], $app->getSignedRequest()->getData());
-    }
-
-    public function testCacheSignedRequestFromPost () {
-        $this->assertFalse(isset($_SESSION['gajus']['puss'][\TEST_APP_ID]['signed_request']));
-
-        $signed_data = self::signData([]);
-
-        $_POST['signed_request'] = $signed_data;
-
-        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
-
-        $this->assertTrue(isset($_SESSION['gajus']['puss'][\TEST_APP_ID]['signed_request']));
-        $this->assertSame($signed_data, $_SESSION['gajus']['puss'][\TEST_APP_ID]['signed_request']);
     }
 
     /*private function makeSignedRequest (array $data) {

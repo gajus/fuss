@@ -35,9 +35,11 @@ class App implements Session {
 		if (isset($_POST['signed_request'])) {  
 			$this->signed_request = new SignedRequest($this, $_POST['signed_request'], SignedRequest::SOURCE_POST);
 
-			$_SESSION['gajus']['puss'][$this->app_id]['signed_request'] = $_POST['signed_request'];
-		} else if (isset($_SESSION['gajus']['puss'][$this->app_id]['signed_request'])) {
-		    $this->signed_request = new SignedRequest($this, $_SESSION['gajus']['puss'][$this->app_id]['signed_request'], SignedRequest::SOURCE_SESSION);
+			$_SESSION['gajus']['puss'][$this->getId()]['signed_request'] = $_POST['signed_request'];
+		} else if (isset($_SESSION['gajus']['puss'][$this->getId()]['signed_request'])) {
+		    $this->signed_request = new SignedRequest($this, $_SESSION['gajus']['puss'][$this->getId()]['signed_request'], SignedRequest::SOURCE_SESSION);
+		} else if (isset($_COOKIE['fbsr_' . $this->getId()])) {
+			$this->signed_request = new SignedRequest($this, $_COOKIE['fbsr_' . $this->getId()], SignedRequest::SOURCE_COOKIE);
 		}
 	}
 
@@ -47,11 +49,11 @@ class App implements Session {
 	 * @param string $signed_request
 	 * @return null
 	 */
-	public function setSignedRequest ($signed_request) {
+	/*public function setSignedRequest ($signed_request) {
 		$this->signed_request = new SignedRequest($this, $signed_request, SignedRequest::SOURCE_INPUT);
 
 		$_SESSION['gajus']['puss'][$this->app_id]['signed_request'] = $signed_request;
-	}
+	}*/
 
 	/**
 	 * @return null|Gajus\Puss\SignedRequest
