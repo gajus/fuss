@@ -45,7 +45,7 @@ class SignedRequest {
 	}
 
 	/**
-	 * Raw signed request.
+	 * Return the signed request payload.
 	 * 
 	 * @return array
 	 */

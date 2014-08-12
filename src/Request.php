@@ -34,8 +34,9 @@ class Request {
 	 * @param Gajus\Puss\Session $session
 	 * @param string $method GET|POST|DELETE
 	 * @param string $path Path relative to the Graph API.
+	 * @param array $query
 	 */
-	public function __construct (\Gajus\Puss\Session $session, $method, $path) {
+	public function __construct (\Gajus\Puss\Session $session, $method, $path, array $query = null) {
 		$this->session = $session;
 
 		$this->access_token = $this->session->getAccessToken();
@@ -55,6 +56,10 @@ class Request {
 		}
 
 		$this->path = $path;
+
+		if ($query) {
+			$this->setQuery($query);;
+		}
 	}
 
 	/**
@@ -68,7 +73,7 @@ class Request {
 	 * @param array $query
 	 * @return null
 	 */
-	public function setQuery (array $query) {
+	private function setQuery (array $query) {
 		if (isset($query['access_token']) || isset($query['appsecret_proof'])) {
 			throw new Exception\RequestException('Cannot overwrite session parameters.');
 		}

@@ -22,6 +22,12 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(\TEST_APP_ID . '|' . \TEST_APP_SECRET, $app->getAccessToken()->getPlain());
     }
 
+    public function testAccessTokenIsCached () {
+        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+        
+        $this->assertSame($app->getAccessToken(), $app->getAccessToken());
+    }
+
     public function testGetSignedRequestFromVoid () {
         $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 

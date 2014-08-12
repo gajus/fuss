@@ -41,6 +41,17 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
         return $test_user;
     }
 
+    public function testGetAppInfo () {
+        $info = $this->app->getAccessToken()->getInfo();
+
+        $this->assertSame([
+            'data' => [
+                'app_id' => \TEST_APP_ID,
+                'is_valid' => true
+            ]
+        ], $info);
+    }
+
     public function testGetPlain () {
         $user = $this->createTestUser();
 
@@ -51,7 +62,7 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
 
     /**
      * @expectedException Gajus\Puss\Exception\AccessTokenException
-     * @expectedExceptionMessage Invalid Access Token. Invalid OAuth access token.
+     * @expectedExceptionMessage Invalid Access Token.
      */
     public function testInvalidAccessToken () {
         new Gajus\Puss\AccessToken($this->app, '123', Gajus\Puss\AccessToken::TYPE_USER);
@@ -122,7 +133,7 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
         $this->assertInstanceOf('Gajus\Puss\AccessToken', $access_token);
     }
 
-    public function testDefaultScope () {
+    public function testGetDefaultScope () {
         $user = $this->createTestUser();
 
         $access_token = new Gajus\Puss\AccessToken($this->app, $user['access_token'], Gajus\Puss\AccessToken::TYPE_USER);
@@ -135,7 +146,7 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
         $this->assertContains('user_friends', $scope);
     }
 
-    public function testCustomScope () {
+    public function testGetCustomScope () {
         $user = $this->createTestUser('email');
 
         $access_token = new Gajus\Puss\AccessToken($this->app, $user['access_token'], Gajus\Puss\AccessToken::TYPE_USER);

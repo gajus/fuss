@@ -61,32 +61,43 @@ class AccessToken {
 	}
 
 	/**
+	 * Populate the access token information using data retrieved from Facebook.
+	 * 
+	 * @throws Gajus\Puss\Exception\AccessTokenException If access token is not valid.
 	 * @return null
 	 */
 	private function debugToken () {
 		if ($this->type != AccessToken::TYPE_APP) {
-			$request = new \Gajus\Puss\Request($this->app, 'GET', 'debug_token');
-			$request->setQuery(['input_token' => $this->access_token]);
-			
-			$response = $request->make();
+			$info = $this->getInfo();
 
-			if (!$response['data']['is_valid']) {
-				// @todo Distinguish
-				throw new Exception\AccessTokenException('Invalid Access Token. ' . $response['data']['error']['message']);
+			if (!$info['data']['is_valid']) {
+				// @todo Distinguish $info['data']['error']['message']
+				throw new Exception\AccessTokenException('Invalid Access Token.');
 			}
 
-			if (isset($response['data']['issued_at'])) {
-				$this->issued_at = $response['data']['issued_at'];
+			if (isset($info['data']['issued_at'])) {
+				$this->issued_at = $info['data']['issued_at'];
 			}
 
-			if (isset($response['data']['expires_at'])) {
-				$this->expires_at = $response['data']['expires_at'];
+			if (isset($info['data']['expires_at'])) {
+				$this->expires_at = $info['data']['expires_at'];
 			}
 
-			if (isset($response['data']['scopes'])) {
-				$this->scope = $response['data']['scopes'];
+			if (isset($info['data']['scopes'])) {
+				$this->scope = $info['data']['scopes'];
 			}
 		}
+	}
+
+	/**
+	 * Fetch info about the access token from Facebook.
+	 *
+	 * @return array
+	 */
+	public function getInfo () {
+		$request = new \Gajus\Puss\Request($this->app, 'GET', 'debug_token', ['input_token' => $this->access_token]);
+		
+		return $request->make();
 	}
 
 	/**
@@ -126,8 +137,7 @@ class AccessToken {
 			throw new Exception\AccessTokenException('Long-lived access token cannot be extended.');
 		}
 
-		$request = new \Gajus\Puss\Request($this->app, 'GET', 'oauth/access_token');
-        $request->setQuery([
+		$request = new \Gajus\Puss\Request($this->app, 'GET', 'oauth/access_token', [
 			'client_id' => $this->app->getId(),
 			'client_secret' => $this->app->getSecret(),
 			'grant_type' => 'fb_exchange_token',
@@ -150,8 +160,7 @@ class AccessToken {
 	 * @return Gajus\Puss\AccessToken
 	 */
 	static public function makeFromCode (\Gajus\Puss\App $app, $code, $redirect_url = '') {
-		$request = new \Gajus\Puss\Request($app, 'GET', 'oauth/access_token');
-		$request->setQuery([
+		$request = new \Gajus\Puss\Request($app, 'GET', 'oauth/access_token', [
 			'client_id' => $app->getId(),
 			'client_secret' => $app->getSecret(),
 			'redirect_uri' => $redirect_url,

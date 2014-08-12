@@ -18,7 +18,11 @@ class App implements Session {
 		/**
 		 * @var Gajus\Puss\SignedRequest
 		 */
-		$signed_request;
+		$signed_request,
+		/**
+		 * @var Gajus\Puss\AccessToken
+		 */
+		$access_token;
 	
 	/**
 	 * @param string $app_id App ID.
@@ -71,10 +75,17 @@ class App implements Session {
 	}
 
 	/**
-	 * @see https://developers.facebook.com/docs/facebook-login/access-tokens
+	 * Deriving the app access token from the app id and secret.
+	 * The access token of this type bypass the access token validation.
+	 * 
+	 * @see https://developers.facebook.com/docs/facebook-login/access-tokens#apptokens
 	 * @return Gajus\Puss\AccessToken
 	 */
 	public function getAccessToken () {
-		return new AccessToken($this, $this->app_id . '|' . $this->app_secret, AccessToken::TYPE_APP);
+		if (!$this->access_token) {
+			$this->access_token = new AccessToken($this, $this->app_id . '|' . $this->app_secret, AccessToken::TYPE_APP);
+		}
+
+		return $this->access_token;
 	}
 }
