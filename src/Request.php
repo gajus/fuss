@@ -6,17 +6,20 @@ namespace Gajus\Puss;
  * @license https://github.com/gajus/puss/blob/master/LICENSE BSD 3-Clause
  */
 class Request {
+	/**
+	 * Refers to the Puss release version.
+	 */
 	const AGENT_VERSION = '0.0.1';
 
 	private
 		/**
+		 * @var Gajus\Puss\Session
+		 */
+		$session,
+		/**
 		 * @var string GET|POST|DELETE
 		 */
 		$method,
-		/**
-		 * @var Gajus\Puss\AccessToken
-		 */
-		$access_token,
 		/**
 		 * @var string
 		 */
@@ -39,23 +42,8 @@ class Request {
 	public function __construct (\Gajus\Puss\Session $session, $method, $path, array $query = null) {
 		$this->session = $session;
 
-		$this->access_token = $this->session->getAccessToken();
-
-		if (!$this->access_token) {
-			throw new Exception\RequestException('Access token is not present.');
-		}
-
-		if ($method != 'GET' && $method != 'POST' && $method != 'DELETE') {
-			throw new Exception\RequestException('Invalid request method.');
-		}
-
-		$this->method = $method;
-		
-		if (strpos($path, '?') !== false) {
-			throw new Exception\RequestException('Path must not have hard-coded query parameters.');
-		}
-
-		$this->path = $path;
+		$this->setMethod($method);
+		$this->setPath($path);
 
 		if ($query) {
 			$this->setQuery($query);;
@@ -63,7 +51,19 @@ class Request {
 	}
 
 	/**
-	 * @return string GET|POST|UPDATE
+	 * @param string $method
+	 * @return null
+	 */
+	public function setMethod ($method) {
+		if ($method != 'GET' && $method != 'POST' && $method != 'DELETE') {
+			throw new Exception\RequestException('Invalid request method.');
+		}
+
+		$this->method = $method;
+	}
+
+	/**
+	 * @return string
 	 */
 	public function getMethod () {
 		return $this->method;
@@ -79,6 +79,18 @@ class Request {
 		}
 
 		$this->query = $query;
+	}
+
+	/**
+	 * @param string $path
+	 * @return null
+	 */
+	private function setPath ($path) {
+		if (strpos($path, '?') !== false) {
+			throw new Exception\RequestException('Path must not have hard-coded query parameters.');
+		}
+
+		$this->path = $path;
 	}
 
 	/**
@@ -101,7 +113,7 @@ class Request {
 	public function getUrl () {
 		$url = 'https://graph.facebook.com/' . trim($this->path, '/');
 
-		$this->query['access_token'] = $this->access_token->getPlain();
+		$this->query['access_token'] = $this->session->getAccessToken()->getPlain();
 		$this->query['appsecret_proof'] = $this->getAppSecretProof();
 
 		// [GraphMethodException] API calls from the server require an appsecret_proof argument
@@ -178,6 +190,6 @@ class Request {
      * @see https://developers.facebook.com/docs/reference/api/securing-graph-api/
      */
     private function getAppSecretProof () {
-       return hash_hmac('sha256', $this->access_token->getPlain(), $this->session->getSecret());
+       return hash_hmac('sha256', $this->session->getAccessToken()->getPlain(), $this->session->getSecret());
     }
 }
