@@ -42,9 +42,8 @@ class UserTest extends PHPUnit_Framework_TestCase {
     private function createTestUser ($permissions = '') {
         $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
-        $request = new Gajus\Puss\Request($app, 'POST', 'app/accounts/test-users');
-        $request->setQuery(['permissions' => $permissions]);
-
+        $request = new Gajus\Puss\Request($app, 'POST', 'app/accounts/test-users', ['permissions' => $permissions]);
+        
         $test_user = $request->make();
 
         self::$test_users[] = $test_user;

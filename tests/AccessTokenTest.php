@@ -31,8 +31,7 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
      * @param boolean $installed Automatically installs the app for the test user once it is created or associated.
      */
     private function createTestUser ($permissions = '') {
-        $request = new Gajus\Puss\Request($this->app, 'POST', 'app/accounts/test-users');
-        $request->setQuery(['permissions' => $permissions]);
+        $request = new Gajus\Puss\Request($this->app, 'POST', 'app/accounts/test-users', ['permissions' => $permissions]);
 
         $test_user = $request->make();
 
@@ -110,8 +109,7 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
 
         // First we need to get the code using the long-lived access token.
         // @see https://developers.facebook.com/docs/facebook-login/access-tokens#long-via-code
-        $request = new Gajus\Puss\Request($user, 'GET', 'oauth/client_code');
-        $request->setQuery([
+        $request = new Gajus\Puss\Request($user, 'GET', 'oauth/client_code', [
             'client_id' => \TEST_APP_ID,
             'client_secret' => \TEST_APP_SECRET,
             'redirect_uri' => ''

@@ -43,8 +43,7 @@ class User implements Session {
 	public function setAccessToken (\Gajus\Puss\AccessToken $access_token) {
 		$this->access_token = $access_token;
 
-		$request = new \Gajus\Puss\Request($this, 'GET', 'me');
-        $request->setQuery(['fields' => 'id']);
+		$request = new \Gajus\Puss\Request($this, 'GET', 'me', ['fields' => 'id']);
         
         $response = $request->make();
 

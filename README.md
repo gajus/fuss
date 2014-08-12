@@ -31,6 +31,9 @@ If you are using [Composer](https://getcomposer.org/) as a package manager, add 
 }
 ```
 
+## Making Graph API calls
+
+
 
 ## Tests
 

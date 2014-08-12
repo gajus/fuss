@@ -34,8 +34,7 @@ class RequestTest extends PHPUnit_Framework_TestCase {
      * @param boolean $installed Automatically installs the app for the test user once it is created or associated.
      */
     private function createTestUser ($permissions = '') {
-        $request = new Gajus\Puss\Request($this->app, 'POST', 'app/accounts/test-users');
-        $request->setQuery(['permissions' => $permissions]);
+        $request = new Gajus\Puss\Request($this->app, 'POST', 'app/accounts/test-users', ['permissions' => $permissions]);
 
         $test_user = $request->make();
 
@@ -78,8 +77,7 @@ class RequestTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testGetUrlWithQuery () {
-        $request = new Gajus\Puss\Request($this->app, 'GET', 'me');
-        $request->setQuery(['a' => 'b']);
+        $request = new Gajus\Puss\Request($this->app, 'GET', 'me', ['a' => 'b']);
 
         $access_token = $this->app->getAccessToken()->getPlain();
 
@@ -92,12 +90,10 @@ class RequestTest extends PHPUnit_Framework_TestCase {
      * @expectedExceptionMessage Cannot overwrite session parameters.
      */
     public function testOverwriteSessionQuery ($parameter_name) {
-        $request = new Gajus\Puss\Request($this->app, 'GET', 'me');
-
         $query = [];
         $query[$parameter_name] = '';
 
-        $request->setQuery($query);
+        $request = new Gajus\Puss\Request($this->app, 'GET', 'me', $query);
     }
 
     public function overwriteSessionQueryProvider () {
