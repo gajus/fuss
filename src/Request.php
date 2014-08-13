@@ -37,7 +37,7 @@ class Request {
      * @param Gajus\Puss\Session $session
      * @param string $method GET|POST|DELETE
      * @param string $path Path relative to the Graph API.
-     * @param array $query
+     * @param array $query GET parameters.
      */
     public function __construct (\Gajus\Puss\Session $session, $method, $path, array $query = null) {
         $this->session = $session;
@@ -54,7 +54,7 @@ class Request {
      * @param string $method
      * @return null
      */
-    public function setMethod ($method) {
+    private function setMethod ($method) {
         if ($method != 'GET' && $method != 'POST' && $method != 'DELETE') {
             throw new Exception\RequestException('Invalid request method.');
         }
@@ -70,7 +70,7 @@ class Request {
     }
 
     /**
-     * @param array $query
+     * @param array $query GET parameters.
      * @return null
      */
     private function setQuery (array $query) {
@@ -111,7 +111,7 @@ class Request {
      * @return string
      */
     public function getUrl () {
-        $url = 'https://graph.facebook.com/' . trim($this->path, '/');
+        $url = 'https://graph.facebook.com/' . ltrim($this->path, '/');
 
         $this->query['access_token'] = $this->session->getAccessToken()->getPlain();
         $this->query['appsecret_proof'] = $this->getAppSecretProof();
@@ -125,7 +125,8 @@ class Request {
     }
 
     /**
-     * @return array
+     * @throws Gajus\Puss\RequestException If the Graph API call results in an error.
+     * @return array Graph API response.
      */
     public function make () {    
         $ch = curl_init();
