@@ -72,12 +72,28 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
     /**
      * @depends testExtendUserAccessToken
      */
-    public function testExchageAccessTokenForCode (\Gajus\Puss\AccessToken $access_token) {
+    public function testExchangeLongLivedAccessTokenForCode (\Gajus\Puss\AccessToken $access_token) {
+        $this->assertTrue($access_token->isLong());
+
         return $access_token->getCode($access_token);
     }
 
     /**
-     * @depends testExchageAccessTokenForCode
+     * @expectedException Gajus\Puss\Exception\AccessTokenException
+     * @expectedExceptionMessage Short-lived access token cannot be used to get code.
+     */
+    public function testExchangeShortLivedAccessTokenForCode () {
+        $user = create_test_user();
+
+        $access_token = new Gajus\Puss\AccessToken($this->app, $user['access_token'], Gajus\Puss\AccessToken::TYPE_USER);
+
+        $this->assertFalse($access_token->isLong());
+
+        $access_token->getCode();
+    }
+
+    /**
+     * @depends testExchangeLongLivedAccessTokenForCode
      */
     public function testExchageCodeForAccessToken ($code) {
         $access_token = Gajus\Puss\AccessToken::makeFromCode($this->app, $code);
