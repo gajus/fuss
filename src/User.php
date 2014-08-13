@@ -30,9 +30,9 @@ class User implements Session {
     }
 
     /**
-     * Get user ID.
+     * Get Facebook user ID.
      *
-     * @return null|int Facebook user ID
+     * @return null|int
      */
     public function getId () {
         return $this->id;

@@ -5,7 +5,7 @@
 [![Latest Stable Version](https://poser.pugx.org/gajus/puss/version.png)](https://packagist.org/packages/gajus/puss)
 [![License](https://poser.pugx.org/gajus/puss/license.png)](https://packagist.org/packages/gajus/puss)
 
-The alternative SDK provides access to the Graph API. In contrast to the [official PHP SDK](https://github.com/facebook/facebook-php-sdk-v4), Puss abstracts the 
+The alternative SDK provides access to the Graph API. The biggest difference between the [official PHP SDK](https://github.com/facebook/facebook-php-sdk-v4) and Puss is the API.
 
 ## Initializing
 
@@ -48,6 +48,27 @@ The `Gajus\Puss\SignedRequest` is available when either of the following is true
  * @return null|Gajus\Puss\SignedRequest
  */
 $signed_request = $app->getSignedRequest();
+
+/**
+ * Get user ID when user access token can be derived from the signed request.
+ *
+ * @return null|int
+ */
+$signed_request->getUserId();
+
+/**
+ * Get page ID when signed request is obtained via the page canvas.
+ * 
+ * @return null|int
+ */
+$signed_request->getPageId();
+
+/**
+ * Return the signed request payload.
+ * 
+ * @return array
+ */
+$signed_request->getPayload();
 ```
 
 ## Get the User Access Token
@@ -59,7 +80,10 @@ The `Gajus\Puss\AccessToken` is available when either of the following is true:
 
 ```php
 /**
- * @return null|Gajus\Puss\SignedRequest
+ * Resolve the user access token from the signed request.
+ * The access token is either provided or it can be exchanged for the code.
+ *
+ * @return null|Gajus\Puss\AccessToken
  */
 $access_token = $signed_request->getAccessToken();
 ```
@@ -73,6 +97,16 @@ You can build an `AccessToken` if you have it (e.g. stored in the database).
  * @param self::TYPE_USER|self::TYPE_APP|self::TYPE_PAGE $type
  */
 $access_token = new Gajus\Puss\AccessToken($app, 'user access token', Gajus\Puss\AccessToken::TYPE_USER);
+```
+
+## Make User
+
+```php
+/**
+ * @param Gajus\Puss\App $app
+ * @param Gajus\Puss\AccessToken $access_token
+ */
+$user = new Gajus\Puss\User($this->app, $access_token);
 ```
 
 ## Make Graph API call

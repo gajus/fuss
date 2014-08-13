@@ -62,6 +62,8 @@ class SignedRequest {
     }
 
     /**
+     * Get user ID when user access token can be derived from the signed request.
+     *
      * @return null|int
      */
     public function getUserId () {
@@ -69,6 +71,8 @@ class SignedRequest {
     }
 
     /**
+     * Get page ID when signed request is obtained via the page canvas.
+     * 
      * @return null|int
      */
     public function getPageId () {
