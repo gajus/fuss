@@ -135,6 +135,34 @@ class RequestTest extends PHPUnit_Framework_TestCase {
         $request->make();
     }
 
+    /**
+     * @dataProvider nonStringBodyParametersProvider
+     */
+    public function testNonStringBodyParameters (array $restrictions) {
+        $request = new Gajus\Puss\Request($this->app, 'POST', 'app');
+        $request->setBody(['restrictions' => $restrictions]);
+
+        $this->assertTrue($request->make());
+
+        $request = new Gajus\Puss\Request($this->app, 'GET', 'app', ['fields' => 'restrictions']);
+
+        $response = $request->make();
+
+        $this->assertSame($restrictions, $response['restrictions']);
+    }
+
+    public function nonStringBodyParametersProvider () {
+        return [
+            [
+                ['age' => '17+'],
+                ['type' => 'alcohol']
+            ],
+            [
+                ['age' => '17+']
+            ]
+        ];
+    }
+
     static private function getAppSecretProof ($access_token) {
        return hash_hmac('sha256', $access_token, \TEST_APP_SECRET);
     }

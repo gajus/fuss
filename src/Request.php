@@ -144,9 +144,10 @@ class Request {
             if ($this->body !== null) {
                 $body = $this->body;
 
+                // @see http://stackoverflow.com/a/7979981/368691
                 foreach ($body as $k => $v) {
                     if (is_array($v)) {
-                        $body[$k] = json_encode($p);
+                        $body[$k] = json_encode($v);
                     }
                 }
                 
