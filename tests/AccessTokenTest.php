@@ -61,6 +61,15 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
+     * @expectedException Gajus\Puss\Exception\AccessTokenException
+     * @expectedExceptionMessage Only user access token can be extended.
+     */
+    public function testExtendAppAccessToken () {
+        $access_token = $this->app->getAccessToken();
+        $access_token->extend();
+    }
+
+    /**
      * @depends testExtendUserAccessToken
      * @expectedException Gajus\Puss\Exception\AccessTokenException
      * @expectedExceptionMessage Long-lived access token cannot be extended.
