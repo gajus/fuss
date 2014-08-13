@@ -44,6 +44,13 @@ class App implements Session {
 	}
 
 	/**
+	 * 
+	 */
+	public function getUser () {
+
+	}
+
+	/**
 	 * Designed to be used for a signed request retrieved via FB.login.
 	 * 
 	 * @param string $signed_request

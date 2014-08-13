@@ -9,49 +9,26 @@ class UserTest extends PHPUnit_Framework_TestCase {
         $raw_user,
         $user;
 
-    static private
-        $test_users = [];
-
     public function setUp () {
-        $this->raw_user = $this->createTestUser();
+        $this->raw_user = create_test_user();
 
         $this->app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
         $access_token = new Gajus\Puss\AccessToken($this->app, $this->raw_user['access_token'], Gajus\Puss\AccessToken::TYPE_USER);
 
-        $this->user = new Gajus\Puss\User($this->app);
-        $this->user->setAccessToken($access_token);
-    }
-
-    /**
-     * Delete all test users after running the test class.
-     */
-    static public function tearDownAfterClass () {
-        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
-
-        foreach (self::$test_users as $test_user) {
-            $request = new Gajus\Puss\Request($app, 'DELETE', $test_user['id']);
-
-            $request->make();
-        }
-    }
-
-    /**
-     * @param boolean $installed Automatically installs the app for the test user once it is created or associated.
-     */
-    private function createTestUser ($permissions = '') {
-        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
-
-        $request = new Gajus\Puss\Request($app, 'POST', 'app/accounts/test-users', ['permissions' => $permissions]);
-        
-        $test_user = $request->make();
-
-        self::$test_users[] = $test_user;
-
-        return $test_user;
+        $this->user = new Gajus\Puss\User($this->app, $access_token);
     }
 
     public function testGetUserId () {
         $this->assertSame($this->raw_user['id'], $this->user->getId());
+    }
+
+    /**
+     * @expectedException Gajus\Puss\Exception\UserException
+     * @expectedExceptionMessage The new access token is for a different user.
+     */
+    public function testChangeAccessTokenToAnotherUser () {
+        $access_token = new Gajus\Puss\AccessToken($this->app, create_test_user()['access_token'], Gajus\Puss\AccessToken::TYPE_USER);
+        $this->user->setAccessToken($access_token);
     }
 }

@@ -22,9 +22,11 @@ class User implements Session {
 	
 	/**
 	 * @param Gajus\Puss\App $app
+	 * @param Gajus\Puss\AccessToken $access_token
 	 */
-	public function __construct ($app) {
+	public function __construct ($app, \Gajus\Puss\AccessToken $access_token) {
 		$this->app = $app;
+		$this->setAccessToken($access_token);
 	}
 
 	/**
@@ -48,6 +50,10 @@ class User implements Session {
         $response = $request->make();
 
         // @todo Check if it is user access token, as oppose to page or whatever.
+
+        if ($this->id && $response['id'] !== $this->id) {
+        	throw new \Gajus\Puss\Exception\UserException('The new access token is for a different user.');
+        }
 
         $this->id = $response['id'];
 	}

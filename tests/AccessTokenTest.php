@@ -7,37 +7,8 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
     private
         $app;
 
-    static private
-        $test_users = [];
-
     public function setUp () {
         $this->app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
-    }
-
-    /**
-     * Delete all test users after running the test class.
-     */
-    static public function tearDownAfterClass () {
-        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
-
-        foreach (self::$test_users as $test_user) {
-            $request = new Gajus\Puss\Request($app, 'DELETE', $test_user['id']);
-
-            $request->make();
-        }
-    }
-
-    /**
-     * @param boolean $installed Automatically installs the app for the test user once it is created or associated.
-     */
-    private function createTestUser ($permissions = '') {
-        $request = new Gajus\Puss\Request($this->app, 'POST', 'app/accounts/test-users', ['permissions' => $permissions]);
-
-        $test_user = $request->make();
-
-        self::$test_users[] = $test_user;
-
-        return $test_user;
     }
 
     public function testGetAppInfo () {
@@ -52,7 +23,7 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testGetPlain () {
-        $user = $this->createTestUser();
+        $user = create_test_user();
 
         $access_token = new Gajus\Puss\AccessToken($this->app, $user['access_token'], Gajus\Puss\AccessToken::TYPE_USER);
 
@@ -71,7 +42,7 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
      * @see https://developers.facebook.com/docs/facebook-login/access-tokens#termtokens
      */
     public function testExtendUserAccessToken () {
-        $user = $this->createTestUser();
+        $user = create_test_user();
 
         $access_token = new Gajus\Puss\AccessToken($this->app, $user['access_token'], Gajus\Puss\AccessToken::TYPE_USER);
 
@@ -100,26 +71,9 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
 
     /**
      * @depends testExtendUserAccessToken
-     * @coversNothing
      */
     public function testExchageAccessTokenForCode (\Gajus\Puss\AccessToken $access_token) {
-        // The request must be made on behalf of the user (using user access_token).
-        $user = new Gajus\Puss\User($this->app);
-        $user->setAccessToken($access_token);
-
-        // First we need to get the code using the long-lived access token.
-        // @see https://developers.facebook.com/docs/facebook-login/access-tokens#long-via-code
-        $request = new Gajus\Puss\Request($user, 'GET', 'oauth/client_code', [
-            'client_id' => \TEST_APP_ID,
-            'client_secret' => \TEST_APP_SECRET,
-            'redirect_uri' => ''
-        ]);
-
-        $response = $request->make();
-
-        $this->assertArrayHasKey('code', $response);
-
-        return $response['code'];
+        return $access_token->getCode($access_token);
     }
 
     /**
@@ -132,7 +86,7 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testGetDefaultScope () {
-        $user = $this->createTestUser();
+        $user = create_test_user();
 
         $access_token = new Gajus\Puss\AccessToken($this->app, $user['access_token'], Gajus\Puss\AccessToken::TYPE_USER);
 
@@ -145,7 +99,7 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testGetCustomScope () {
-        $user = $this->createTestUser('email');
+        $user = create_test_user('email');
 
         $access_token = new Gajus\Puss\AccessToken($this->app, $user['access_token'], Gajus\Puss\AccessToken::TYPE_USER);
 

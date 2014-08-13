@@ -10,37 +10,8 @@ class RequestTest extends PHPUnit_Framework_TestCase {
          */
         $app;
 
-    static private
-        $test_users = [];
-
     public function setUp () {
         $this->app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
-    }
-
-    /**
-     * Delete all test users after running the test class.
-     */
-    static public function tearDownAfterClass () {
-        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
-
-        foreach (self::$test_users as $test_user) {
-            $request = new Gajus\Puss\Request($app, 'DELETE', $test_user['id']);
-
-            $request->make();
-        }
-    }
-
-    /**
-     * @param boolean $installed Automatically installs the app for the test user once it is created or associated.
-     */
-    private function createTestUser ($permissions = '') {
-        $request = new Gajus\Puss\Request($this->app, 'POST', 'app/accounts/test-users', ['permissions' => $permissions]);
-
-        $test_user = $request->make();
-
-        self::$test_users[] = $test_user;
-
-        return $test_user;
     }
 
     public function testUserAgentVersion () {
@@ -56,28 +27,15 @@ class RequestTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testGetUserUrl () {
-        $access_token = $this->createTestUser()['access_token'];
+        $access_token = create_test_user()['access_token'];
 
-        $user = new Gajus\Puss\User($this->app);
-        $user->setAccessToken(new Gajus\Puss\AccessToken($this->app, $access_token, Gajus\Puss\AccessToken::TYPE_USER));
+        $user = new Gajus\Puss\User($this->app, new Gajus\Puss\AccessToken($this->app, $access_token, Gajus\Puss\AccessToken::TYPE_USER));
 
         $request = new Gajus\Puss\Request($user, 'GET', 'me');
 
         $this->assertSame('https://graph.facebook.com/me?access_token=' . urlencode($access_token) . '&appsecret_proof=' . self::getAppSecretProof($access_token), $request->getUrl());
     }
-
-    /**
-     * @expectedException Gajus\Puss\Exception\RequestException
-     * @expectedExceptionMessage Access token is not present.
-     */
-    public function testInvalidSession () {
-        $this->markTestSkipped('User will have access token present at all time.');
-
-        $user = new Gajus\Puss\User($this->app);
-        
-        new Gajus\Puss\Request($user, 'GET', 'me');
-    }
-
+    
     public function testGetUrlWithQuery () {
         $request = new Gajus\Puss\Request($this->app, 'GET', 'me', ['a' => 'b']);
 

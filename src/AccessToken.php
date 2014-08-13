@@ -151,6 +151,33 @@ class AccessToken {
         $this->debugToken();
     }
 
+    /**
+     * Get the code for the long-lived access token.
+     *
+     * @see https://developers.facebook.com/docs/facebook-login/access-tokens#long-via-code
+     * @return string
+     */
+    public function getCode () {
+    	if (!$this->isLong()) {
+    		throw new Exception\AccessTokenException('Short-lived access token cannot be used to get code.');
+    	}
+
+    	// The request must be made on behalf of the user (using user access_token).
+        $user = new \Gajus\Puss\User($this->app, $this);
+
+        // First we need to get the code using the long-lived access token.
+        // @see https://developers.facebook.com/docs/facebook-login/access-tokens#long-via-code
+        $request = new \Gajus\Puss\Request($user, 'GET', 'oauth/client_code', [
+            'client_id' => $this->app->getId(),
+            'client_secret' => $this->app->getSecret(),
+            'redirect_uri' => ''
+        ]);
+
+        $response = $request->make();
+
+        return $response['code'];
+    }
+
 	/**
 	 * Exchange code for an access token.
 	 *

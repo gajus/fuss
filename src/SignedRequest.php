@@ -35,7 +35,11 @@ class SignedRequest {
 		/**
 		 * @var array
 		 */
-		$signed_request;
+		$signed_request,
+		/**
+		 * @var Gajus\Puss\AccessToken
+		 */
+		$access_token;
 	
 	/**
 	 * @param string $raw_signed_request It is base64url encoded and signed with an HMAC version of your App Secret, based on the OAuth 2.0 spec.
@@ -53,7 +57,7 @@ class SignedRequest {
 	 * 
 	 * @return array
 	 */
-	public function getData () {
+	public function getPayload () {
 		return $this->signed_request;
 	}
 
@@ -72,17 +76,21 @@ class SignedRequest {
 	}
 
 	/**
-	 * @return null|string
+	 * Resolve the user access token from the signed request.
+	 * The access token is either provided or it can be exchanged for the code.
+	 *
+	 * @return null|Gajus\Puss\AccessToken
 	 */
 	public function getAccessToken () {
-		return isset($this->signed_request['oauth_token']) ? $this->signed_request['oauth_token'] : null;
-	}
+		if (!$this->access_token) {
+			if (isset($this->signed_request['oauth_token'])) {
+				$this->access_token = new \Gajus\Puss\AccessToken($this->app, $this->signed_request['oauth_token'], \Gajus\Puss\AccessToken::TYPE_USER);
+			} else if (isset($this->signed_request['code'])) {
+				$this->access_token = \Gajus\Puss\AccessToken::makeFromCode($this->app, $this->signed_request['code']);
+			}
+		}
 
-	/**
-	 * @return null|string
-	 */
-	public function getCode () {
-		return isset($this->signed_request['code']) ? $this->signed_request['code'] : null;
+		return $this->access_token;
 	}
 
 	/**

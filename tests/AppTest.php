@@ -32,17 +32,17 @@ class AppTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testGetSignedRequestFromPost () {
-        $_POST['signed_request'] = self::signData(['foo' => 'bar']);
+        $_POST['signed_request'] = sign_data(['foo' => 'bar']);
 
         $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
-        $this->assertSame(['foo' => 'bar'], $app->getSignedRequest()->getData());
+        $this->assertSame(['foo' => 'bar'], $app->getSignedRequest()->getPayload());
     }
 
     public function testSignedRequestFromPostIsCached () {
         $this->assertFalse(isset($_SESSION['gajus']['puss'][\TEST_APP_ID]['signed_request']));
 
-        $signed_data = self::signData([]);
+        $signed_data = sign_data([]);
 
         $_POST['signed_request'] = $signed_data;
 
@@ -53,40 +53,18 @@ class AppTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testGetSignedRequestFromCookie () {
-        $_COOKIE['fbsr_' . $this->app->getId()]= self::signData(['foo' => 'bar']);
+        $_COOKIE['fbsr_' . $this->app->getId()]= sign_data(['foo' => 'bar']);
 
         $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
-        $this->assertSame(['foo' => 'bar'], $app->getSignedRequest()->getData());
+        $this->assertSame(['foo' => 'bar'], $app->getSignedRequest()->getPayload());
     }
 
     public function testGetSignedRequestFromSession () {
-        $_SESSION['gajus']['puss'][\TEST_APP_ID]['signed_request'] = self::signData(['foo' => 'bar']);
+        $_SESSION['gajus']['puss'][\TEST_APP_ID]['signed_request'] = sign_data(['foo' => 'bar']);
 
         $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
-        $this->assertSame(['foo' => 'bar'], $app->getSignedRequest()->getData());
-    }
-
-    /*private function makeSignedRequest (array $data) {
-        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
-
-        return new Gajus\Puss\SignedRequest($app, self::signData($data), Gajus\Puss\SignedRequest::SOURCE_INPUT);
-    }*/
-
-    static private function signData (array $data) {
-        $data = json_encode($data, \JSON_UNESCAPED_SLASHES);
-        $encoded_data = self::encodeBase64Url($data);
-        $encoded_signature = self::encodeBase64Url(hash_hmac('sha256', $encoded_data, \TEST_APP_SECRET, true));
-
-        return $encoded_signature . '.' . $encoded_data;
-    }
-
-    static private function encodeBase64Url ($input) {
-        return rtrim(strtr(base64_encode($input), '+/', '-_'), '=');
-    }
-
-    static private function decodeBase64Url ($input) {
-        return base64_decode(str_pad(strtr($input, '-_', '+/'), strlen($input) % 4, '=', STR_PAD_RIGHT)); 
+        $this->assertSame(['foo' => 'bar'], $app->getSignedRequest()->getPayload());
     }
 }
