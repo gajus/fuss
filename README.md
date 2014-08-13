@@ -23,18 +23,6 @@ $app = new Gajus\Puss\App('your app ID', 'your app secret');
 
 In the original PHP SDK, [`FacebookSession::setDefaultApplication`](https://developers.facebook.com/docs/php/gettingstarted/4.0.0#init) is used to set the default app credentials statically, making them accessible for future calls without needing to reference an equivalent of the `Gajus\Puss\App` instance.
 
-## Installation
-
-If you are using [Composer](https://getcomposer.org/) as a package manager, add the following dependency to the `composer.json` and run composer with the install parameter.
-
-```
-{
-    "require" : {
-        "gajus/puss" : "1.0.*"
-    }
-}
-```
-
 ## Get the Signed Request
 
 The `Gajus\Puss\SignedRequest` is available when either of the following is true:
@@ -127,6 +115,18 @@ $request = new Gajus\Puss\Request($app, 'GET', 'app');
  * @return array Graph API response.
  */
 $request->make();
+```
+
+## Installation
+
+If you are using [Composer](https://getcomposer.org/) as a package manager, add the following dependency to the `composer.json` and run composer with the install parameter.
+
+```
+{
+    "require" : {
+        "gajus/puss" : "1.0.*"
+    }
+}
 ```
 
 ## Tests
