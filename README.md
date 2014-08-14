@@ -7,7 +7,7 @@
 
 The Facebook SDK for PHP provides an interface to the Graph API. The main difference between the [official PHP SDK](https://github.com/facebook/facebook-php-sdk-v4) and Puss is the API.
 
-## Initializing
+## Initializing App
 
 > You will need to have configured a Facebook App, which you can obtain from the [App Dashboard](https://developers.facebook.com/apps).
 
@@ -140,7 +140,7 @@ Finally, you want to know when does the access token expire:
 $access_token->getExpirationTimestamp();
 ```
 
-If you are planning to store the access token in the database:
+Get a string copy to store the access token for later use:
 
 ```php
 /**
@@ -149,7 +149,9 @@ If you are planning to store the access token in the database:
 $access_token->getPlain();
 ```
 
-## Make User
+## Initializing User
+
+In order to make calls on behalf of a [user](https://developers.facebook.com/docs/graph-api/reference/v2.1/user), you need to create `User` with valid access token:
 
 ```php
 /**
@@ -159,7 +161,7 @@ $access_token->getPlain();
 $user = new Gajus\Puss\User($this->app, $access_token);
 ```
 
-## Make Graph API call
+## Making Graph API calls
 
 An API call can be made using either `Gajus\Puss\App` or `Gajus\Puss\User` context. If use `App` context, then app access token is used; is use `User` context, then user access token is used.
 
