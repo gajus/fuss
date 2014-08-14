@@ -12,7 +12,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testGetId () {
-        $this->assertSame(\TEST_APP_ID, $this->app->getId());
+        $this->assertSame((int) \TEST_APP_ID, $this->app->getId());
     }
 
     public function testGetSecret () {
