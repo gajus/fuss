@@ -6,32 +6,11 @@ namespace Gajus\Puss;
  * @license https://github.com/gajus/puss/blob/master/LICENSE BSD 3-Clause
  */
 class SignedRequest {
-    /**
-     * The signed request from $_POST['signed_request'].
-     */
-    const SOURCE_POST = 'POST';
-    /**
-     * The signed request from $_SESSION['gajus']['puss'][{APP-ID}]['signed_request'].
-     */
-    const SOURCE_SESSION = 'SESSION';
-    /**
-     * The signed request from cookie set from the Javascript SDK, $_COOKIE['fbsr_' {APP-ID}].
-     */
-    const SOURCE_COOKIE = 'COOKIE';
-    /**
-     * The signed request from user input (e.g. acquired via FB.login).
-     */
-    const SOURCE_INPUT = 'INPUT';
-
     private
         /**
          * @var Gajus\Puss\App
          */
         $app,
-        /**
-         * @var self::SOURCE_POST|self::SOURCE_SESSION|self::SOURCE_INPUT
-         */
-        $source,
         /**
          * @var array
          */
@@ -44,11 +23,9 @@ class SignedRequest {
     /**
      * @param string $raw_signed_request It is base64url encoded and signed with an HMAC version of your App Secret, based on the OAuth 2.0 spec.
      * @param Gajus\Puss\App $app
-     * @param self::SOURCE_POST|self::SOURCE_SESSION|self::SOURCE_INPUT $source
      */
-    public function __construct (App $app, $raw_signed_request, $source) {
+    public function __construct (App $app, $raw_signed_request) {
         $this->app = $app;
-        $this->source = $source;
         $this->signed_request = $this->parse($raw_signed_request);
     }
 

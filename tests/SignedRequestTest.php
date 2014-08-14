@@ -20,7 +20,7 @@ class SignedRequestTest extends PHPUnit_Framework_TestCase {
      * @exceptedExceptionMessage Invalid signature.
      */
     public function testInvalidSignature () {
-        new Gajus\Puss\SignedRequest($this->app, sign_data([], 'abc'), Gajus\Puss\SignedRequest::SOURCE_INPUT);
+        new Gajus\Puss\SignedRequest($this->app, sign_data([], 'abc'));
     }
 
     public function testGetPayload () {

@@ -27,6 +27,14 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $this->assertSame($this->app->getAccessToken(), $this->app->getAccessToken());
     }
 
+    public function testSetSignedRequest () {
+        $raw_signed_request = sign_data(['foo' => 'bar']);
+
+        $this->app->setSignedRequest($raw_signed_request);
+
+        $this->assertSame(['foo' => 'bar'], $this->app->getSignedRequest()->getPayload());
+    }
+
     public function testGetSignedRequestFromVoid () {
         $this->assertNull($this->app->getSignedRequest());
     }

@@ -37,7 +37,7 @@ function create_test_user ($permissions = '') {
 function make_signed_request (array $data) {
     $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
-    return new Gajus\Puss\SignedRequest($app, sign_data($data), Gajus\Puss\SignedRequest::SOURCE_INPUT);
+    return new Gajus\Puss\SignedRequest($app, sign_data($data));
 }
 
 /**

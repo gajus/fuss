@@ -27,7 +27,7 @@ In the original Facebook PHP SDK, [`FacebookSession::setDefaultApplication`](htt
 
 The [signed request](https://developers.facebook.com/docs/reference/login/signed-request/) is encapsulated in the `Gajus\Puss\SignedRequest` entity. It is available via an instance of `App` when either of the following is true:
 
-* The signed request was received via the `$_POST['signed_request']`. In this case, a copy of the raw signed request is stored in the user session.
+* The signed request was received via the `$_POST['signed_request']`.
 * The signed request is present in the user session.
 * The signed request is present in the JavaScript SDK cookie.
 
@@ -37,6 +37,23 @@ The [signed request](https://developers.facebook.com/docs/reference/login/signed
  */
 $signed_request = $app->getSignedRequest();
 ```
+
+You might have obtained the signed request via the JavaScript SDK (e.g. [FB.getLoginStatus](https://developers.facebook.com/docs/reference/javascript/FB.getLoginStatus#response_and_session_objects)). In which case, you can share it with the app:
+
+```php
+/**
+ * Designed to be used for a signed request retrieved via the JavaScript SDK.
+ * 
+ * @see https://developers.facebook.com/docs/reference/javascript/FB.getLoginStatus#response_and_session_objects
+ * @param string $signed_request
+ * @return null
+ */
+$app->setSignedRequest('the signed request');
+```
+
+The sign request is stored in the user session and can be retrieved on the following request.
+
+### Signed Request Data
 
 A signed request contains some additional fields of information, even before permissions have been requested:
 
