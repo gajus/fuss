@@ -7,9 +7,15 @@
 
 The Facebook SDK for PHP provides an interface to the Graph API. The main difference between the [official PHP SDK](https://github.com/facebook/facebook-php-sdk-v4) and Puss is the API.
 
+## Reinventing the Wheel
+
+The original [facebook/facebook-php-sdk](https://github.com/facebook/facebook-php-sdk) is lacking separation of concerns. The [facebook/facebook-php-sdk-v4](https://github.com/facebook/facebook-php-sdk-v4) is a big step forward. Nonetheless, it came with its own evils that I could not live with (e.g. use of stateful programming and globals). The API itself is designed to cover all uses cases, which is expected of the official SDK, though not necessary needed for an average Facebook app. Puss is trading some of the functionality in favor of a more intuitive API.
+
+I am looking forward to hearing feedback either via gk@anuary.com or in the [issues](https://github.com/gajus/puss/issues) section.
+
 ## Everything Together
 
-The following example is meant to cover the most common use case for Puss. In this document you will description of each API method.
+The following example is meant to cover the most common use scenario for Puss. If you need further guidance, this document contains description of every Puss SDK use-case and method.
 
 ```php
 $app = new Gajus\Puss\App('your app ID', 'your app secret');
@@ -51,7 +57,7 @@ Initialize the SDK with your app ID and secret:
 $app = new Gajus\Puss\App('your app ID', 'your app secret');
 ```
 
-In the original Facebook PHP SDK, [`FacebookSession::setDefaultApplication`](https://developers.facebook.com/docs/php/gettingstarted/4.0.0#init) is used to set the default app credentials statically, making them accessible for future calls without needing to reference an equivalent of the `Gajus\Puss\App` instance. Puss does not use stateful programing or global variables.
+> In the original Facebook PHP SDK, [`FacebookSession::setDefaultApplication`](https://developers.facebook.com/docs/php/gettingstarted/4.0.0#init) is used to set the default app credentials statically, making them accessible for future calls without needing to reference an equivalent of the `Gajus\Puss\App` instance.
 
 ## Get the Signed Request
 
