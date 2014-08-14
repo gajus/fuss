@@ -124,7 +124,9 @@ class AccessToken {
 
     /**
      * Extend a short-lived access token for a long-lived access token.
-     * 
+     * Upon successfully extending the token, the instance of the object
+     * is updated with the long-lived access token.
+     *
      * @see https://developers.facebook.com/docs/facebook-login/access-tokens#extending
      * @return null
      */

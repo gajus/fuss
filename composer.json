@@ -1,7 +1,7 @@
 {
     "name": "gajus/puss",
     "version": "0.0.1",
-    "description": "Facebook SDK for PHP provides interface to the Graph API.",
+    "description": "The Facebook SDK for PHP provides an interface to the Graph API.",
     "keywords": ["facebook", "sdk"],
     "homepage": "https://github.com/gajus/puss",
     "type": "library",
@@ -13,7 +13,7 @@
         }
     ],
     "require": {
-        "php": ">=5.3"
+        "php": ">=5.4"
     },
     "require-dev": {
         "satooshi/php-coveralls": "dev-master"

@@ -8,7 +8,7 @@ namespace Gajus\Puss;
 class App implements Session {
     private
         /**
-         * @var string App ID.
+         * @var int App ID.
          */
         $app_id,
         /**
@@ -25,11 +25,11 @@ class App implements Session {
         $access_token;
     
     /**
-     * @param string $app_id App ID.
+     * @param int $app_id App ID.
      * @param string $app_secret App secret.
      */
     public function __construct ($app_id, $app_secret) {
-        $this->app_id = (string) $app_id;
+        $this->app_id = (int) $app_id;
         $this->app_secret = (string) $app_secret;
 
         if (isset($_POST['signed_request'])) {  
@@ -42,13 +42,6 @@ class App implements Session {
             $this->signed_request = new SignedRequest($this, $_COOKIE['fbsr_' . $this->getId()], SignedRequest::SOURCE_COOKIE);
         }
     }
-
-    /**
-     * 
-     */
-    /*public function getUser () {
-
-    }*/
 
     /**
      * Designed to be used for a signed request retrieved via FB.login.
@@ -70,7 +63,7 @@ class App implements Session {
     }
 
     /**
-     * @return string
+     * @return int
      */
     public function getId () {
         return $this->app_id;

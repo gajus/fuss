@@ -90,7 +90,7 @@ The `Gajus\Puss\AccessToken` is available when either of the following is true:
 $access_token = $signed_request->getAccessToken();
 ```
 
-You can build an `AccessToken` if you have it (e.g. stored in the database).
+You can build an `AccessToken` if you have it (e.g. stored in the database):
 
 ```php
 /**
@@ -99,6 +99,54 @@ You can build an `AccessToken` if you have it (e.g. stored in the database).
  * @param self::TYPE_USER|self::TYPE_APP|self::TYPE_PAGE $type
  */
 $access_token = new Gajus\Puss\AccessToken($app, 'user access token', Gajus\Puss\AccessToken::TYPE_USER);
+```
+
+### Extend The Access Token
+
+Access tokens generated via web login are [short-lived](https://developers.facebook.com/docs/facebook-login/access-tokens#termtokens) tokens, but you can upgrade them to long-lived tokens.
+
+You can check if the access token is long-lived:
+
+```php
+/**
+ * The issued_at field is not returned for short-lived access tokens.
+ * 
+ * @see https://developers.facebook.com/docs/facebook-login/access-tokens#debug
+ * @return boolean
+ */
+$access_token->isLong();
+```
+
+If it is short-lived access token, you can extend it:
+
+```php
+/**
+ * Extend a short-lived access token for a long-lived access token.
+ * Upon successfully extending the token, the instance of the object
+ * is updated with the long-lived access token.
+ *
+ * @see https://developers.facebook.com/docs/facebook-login/access-tokens#extending
+ * @return null
+ */
+$access_token->extend();
+```
+
+Finally, you want to know when does the access token expire:
+
+```php
+/**
+ * @return int
+ */
+$access_token->getExpirationTimestamp();
+```
+
+If you are planning to store the access token in the database:
+
+```php
+/**
+ * @return string The access token as a string.
+ */
+$access_token->getPlain();
 ```
 
 ## Make User
