@@ -5,7 +5,7 @@
 [![Latest Stable Version](https://poser.pugx.org/gajus/puss/version.png)](https://packagist.org/packages/gajus/puss)
 [![License](https://poser.pugx.org/gajus/puss/license.png)](https://packagist.org/packages/gajus/puss)
 
-The alternative SDK provides access to the Graph API. The biggest difference between the [official PHP SDK](https://github.com/facebook/facebook-php-sdk-v4) and Puss is the API.
+The Facebook SDK for PHP provides an interface to the Graph API. The main difference between the [official PHP SDK](https://github.com/facebook/facebook-php-sdk-v4) and Puss is the API.
 
 ## Initializing
 
@@ -21,39 +21,53 @@ Initialize the SDK with your app ID and secret:
 $app = new Gajus\Puss\App('your app ID', 'your app secret');
 ```
 
-In the original PHP SDK, [`FacebookSession::setDefaultApplication`](https://developers.facebook.com/docs/php/gettingstarted/4.0.0#init) is used to set the default app credentials statically, making them accessible for future calls without needing to reference an equivalent of the `Gajus\Puss\App` instance.
+In the original Facebook PHP SDK, [`FacebookSession::setDefaultApplication`](https://developers.facebook.com/docs/php/gettingstarted/4.0.0#init) is used to set the default app credentials statically, making them accessible for future calls without needing to reference an equivalent of the `Gajus\Puss\App` instance. Puss does not use stateful programing or global variables.
 
 ## Get the Signed Request
 
-The `Gajus\Puss\SignedRequest` is available when either of the following is true:
+The [signed request](https://developers.facebook.com/docs/reference/login/signed-request/) is encapsulated in the `Gajus\Puss\SignedRequest` entity. It is available via an instance of `App` when either of the following is true:
 
 * The signed request was received via the `$_POST['signed_request']`. In this case, a copy of the raw signed request is stored in the user session.
-* The signed request is available in the user session.
-* The signed request is available from the Javascript SDK dropped cookie.
+* The signed request is present in the user session.
+* The signed request is present in the JavaScript SDK cookie.
 
 ```php
 /**
  * @return null|Gajus\Puss\SignedRequest
  */
 $signed_request = $app->getSignedRequest();
+```
 
+A signed request contains some additional fields of information, even before permissions have been requested:
+
+```php
 /**
- * Get user ID when user access token can be derived from the signed request.
+ * User ID when user access token is in or can be derived from the signed request.
  *
  * @return null|int
  */
 $signed_request->getUserId();
 
 /**
- * Get page ID when signed request is obtained via the page canvas.
+ * Page ID when a Page tab loads the app.
  * 
  * @return null|int
  */
 $signed_request->getPageId();
 
 /**
+ * The content of the app_data query string parameter which may be passed if the app is being loaded within a Page Tab.
+ * The JSON input is automatically decoded.
+ * 
+ * @see https://developers.facebook.com/docs/reference/login/signed-request/
+ * @return mixed
+ */
+$signed_request->getAppData();
+
+/**
  * Return the signed request payload.
  * 
+ * @see https://developers.facebook.com/docs/reference/login/signed-request/
  * @return array
  */
 $signed_request->getPayload();

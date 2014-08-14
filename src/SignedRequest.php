@@ -53,33 +53,6 @@ class SignedRequest {
     }
 
     /**
-     * Return the signed request payload.
-     * 
-     * @return array
-     */
-    public function getPayload () {
-        return $this->signed_request;
-    }
-
-    /**
-     * Get user ID when user access token can be derived from the signed request.
-     *
-     * @return null|int
-     */
-    public function getUserId () {
-        return isset($this->signed_request['user_id']) ? (int) $this->signed_request['user_id'] : null;
-    }
-
-    /**
-     * Get page ID when signed request is obtained via the page canvas.
-     * 
-     * @return null|int
-     */
-    public function getPageId () {
-        return isset($this->signed_request['page']['id']) ? (int) $this->signed_request['page']['id'] : null;
-    }
-
-    /**
      * Resolve the user access token from the signed request.
      * The access token is either provided or it can be exchanged for the code.
      *
@@ -95,6 +68,55 @@ class SignedRequest {
         }
 
         return $this->access_token;
+    }
+
+    /**
+     * User ID when user access token is in or can be derived from the signed request.
+     *
+     * @return null|int
+     */
+    public function getUserId () {
+        return isset($this->signed_request['user_id']) ? (int) $this->signed_request['user_id'] : null;
+    }
+
+    /**
+     * Page ID when a Page tab loads the app.
+     * 
+     * @return null|int
+     */
+    public function getPageId () {
+        return isset($this->signed_request['page']['id']) ? (int) $this->signed_request['page']['id'] : null;
+    }
+
+    /**
+     * The content of the app_data query string parameter which may be passed if the app is being loaded within a Page Tab.
+     * The JSON input is automatically decoded.
+     * 
+     * @see https://developers.facebook.com/docs/reference/login/signed-request/
+     * @return mixed
+     */
+    public function getAppData () {
+        $app_data = isset($this->signed_request['app_data']) ? $this->signed_request['app_data'] : null;
+
+        if (is_string($app_data)) {
+            $data = json_decode($app_data, true);
+
+            if (json_last_error() == JSON_ERROR_NONE) {
+                $app_data = $data;
+            }
+        }
+
+        return $app_data;
+    }
+
+    /**
+     * Return the signed request payload.
+     * 
+     * @see https://developers.facebook.com/docs/reference/login/signed-request/
+     * @return array
+     */
+    public function getPayload () {
+        return $this->signed_request;
     }
 
     /**

@@ -29,6 +29,36 @@ class SignedRequestTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(['foo' => 'bar'], $signed_request->getPayload());
     }
 
+    /**
+     * @dataProvider getAppDataProvider
+     */
+    public function testGetAppData ($signed_request_payload, $expected_data) {
+        $signed_request = make_signed_request($signed_request_payload);
+
+        $this->assertSame($expected_data, $signed_request->getAppData());
+    }
+
+    public function getAppDataProvider () {
+        return [
+            [
+                [],
+                null
+            ],
+            [
+                ['app_data' => 'foo'], // ?app_data=foo
+                'foo'
+            ],
+            [
+                ['app_data' => ['foo' => 'bar']], // ?app_data[foo]=bar
+                ['foo' => 'bar']
+            ],
+            [
+                ['app_data' => '{"foo":"bar","baz":"qux"}'], // ?app_data={"foo":"bar","baz":"qux"}
+                ['foo' => 'bar', 'baz' => 'qux']
+            ]
+        ];
+    }
+
     public function testGetUserId () {
         $signed_request = make_signed_request([]);
 
