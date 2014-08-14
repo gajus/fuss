@@ -7,6 +7,36 @@
 
 The Facebook SDK for PHP provides an interface to the Graph API. The main difference between the [official PHP SDK](https://github.com/facebook/facebook-php-sdk-v4) and Puss is the API.
 
+## Everything Together
+
+The following example is meant to cover the most common use case for Puss. In this document you will description of each API method.
+
+```php
+$app = new Gajus\Puss\App('your app ID', 'your app secret');
+$user = null;
+
+$signed_request = $app->getSignedRequest();
+
+if ($signed_request) {
+    $access_token = $signed_request->getAccessToken();
+
+    if ($access_token) {
+        if (!$access_token->isLong()) {
+            $access_token->extend();
+        }
+
+        $user = new Gajus\Puss\User($access_token);
+    }
+}
+
+if ($user) {
+    $request = new Gajus\Puss\Request($user, 'GET', 'me', ['fields' => 'first_name']);
+    $response = $request->make();
+
+    // $response['first_name']
+}
+```
+
 ## Initializing App
 
 > You will need to have configured a Facebook App, which you can obtain from the [App Dashboard](https://developers.facebook.com/apps).
@@ -172,7 +202,6 @@ In order to make calls on behalf of a [user](https://developers.facebook.com/doc
 
 ```php
 /**
- * @param Gajus\Puss\App $app
  * @param Gajus\Puss\AccessToken $access_token
  */
 $user = new Gajus\Puss\User($access_token);
@@ -219,21 +248,6 @@ $request = new Gajus\Puss\Request($app, 'GET', 'app');
  * @return array Graph API response.
  */
 $request->make();
-```
-
-## Putting Everything Together
-
-```php
-$app = new Gajus\Puss\App('your app ID', 'your app secret');
-$user = null;
-
-$signed_request = $app->getSignedRequest();
-
-if ($signed_request) {
-    $access_token = $signed_request->getAccessToken();
-
-    $user = new Gajus\Puss\User($access_token);
-}
 ```
 
 ## Installation
