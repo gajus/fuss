@@ -29,7 +29,7 @@ class RequestTest extends PHPUnit_Framework_TestCase {
     public function testGetUserUrl () {
         $access_token = create_test_user()['access_token'];
 
-        $user = new Gajus\Puss\User($this->app, new Gajus\Puss\AccessToken($this->app, $access_token, Gajus\Puss\AccessToken::TYPE_USER));
+        $user = new Gajus\Puss\User(new Gajus\Puss\AccessToken($this->app, $access_token, Gajus\Puss\AccessToken::TYPE_USER));
 
         $request = new Gajus\Puss\Request($user, 'GET', 'me');
 

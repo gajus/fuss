@@ -122,7 +122,7 @@ $access_token = new Gajus\Puss\AccessToken($app, 'user access token', Gajus\Puss
 
 Access tokens generated via web login are [short-lived](https://developers.facebook.com/docs/facebook-login/access-tokens#termtokens) tokens, but you can upgrade them to long-lived tokens.
 
-You can check if the access token is long-lived:
+To check if the access token is long-lived:
 
 ```php
 /**
@@ -134,7 +134,7 @@ You can check if the access token is long-lived:
 $access_token->isLong();
 ```
 
-If it is short-lived access token, you can extend it:
+To extend a short-lived access token:
 
 ```php
 /**
@@ -148,16 +148,16 @@ If it is short-lived access token, you can extend it:
 $access_token->extend();
 ```
 
-Finally, you want to know when does the access token expire:
+To know when does the access token expire:
 
 ```php
 /**
- * @return int
+ * @return int UNIX timestamp in seconds.
  */
 $access_token->getExpirationTimestamp();
 ```
 
-Get a string copy to store the access token for later use:
+Take a string copy to store the access token for later use:
 
 ```php
 /**
@@ -168,14 +168,37 @@ $access_token->getPlain();
 
 ## Initializing User
 
-In order to make calls on behalf of a [user](https://developers.facebook.com/docs/graph-api/reference/v2.1/user), you need to create `User` with valid access token:
+In order to make calls on behalf of a [user](https://developers.facebook.com/docs/graph-api/reference/v2.1/user), you need to create `User` entity with a valid access token:
 
 ```php
 /**
  * @param Gajus\Puss\App $app
  * @param Gajus\Puss\AccessToken $access_token
  */
-$user = new Gajus\Puss\User($this->app, $access_token);
+$user = new Gajus\Puss\User($access_token);
+```
+
+Upon instantiating the `User` object, the access token is used to fetch information about the user.
+
+```php
+/**
+ * Get Facebook user ID.
+ * Beware that as of Graph API v2.0, the user ID is app-scoped.
+ *
+ * @see https://developers.facebook.com/docs/apps/upgrading#upgrading_v2_0_user_ids
+ * @return null|int
+ */
+$user->getId();
+```
+
+You can update user access token:
+
+```php
+/**
+ * @param Gajus\Puss\AccessToken $access_token
+ * @return null
+ */
+$user->setAccessToken($access_token);
 ```
 
 ## Making Graph API calls
@@ -196,6 +219,21 @@ $request = new Gajus\Puss\Request($app, 'GET', 'app');
  * @return array Graph API response.
  */
 $request->make();
+```
+
+## Putting Everything Together
+
+```php
+$app = new Gajus\Puss\App('your app ID', 'your app secret');
+$user = null;
+
+$signed_request = $app->getSignedRequest();
+
+if ($signed_request) {
+    $access_token = $signed_request->getAccessToken();
+
+    $user = new Gajus\Puss\User($access_token);
+}
 ```
 
 ## Installation

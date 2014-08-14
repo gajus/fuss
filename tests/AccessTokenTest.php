@@ -11,6 +11,10 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
         $this->app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
     }
 
+    public function testGetApp () {
+        $this->assertSame($this->app, $this->app->getAccessToken()->getApp());
+    }
+
     public function testGetAppInfo () {
         $info = $this->app->getAccessToken()->getInfo();
 

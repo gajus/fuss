@@ -49,6 +49,12 @@ class AccessToken {
         $this->debugToken();
     }
 
+    /**
+     * @return Gajus\Puss\App $app
+     */
+    public function getApp () {
+        return $this->app;
+    }
 
     /**
      * The issued_at field is not returned for short-lived access tokens.
@@ -101,7 +107,7 @@ class AccessToken {
     }
 
     /**
-     * @return int
+     * @return int UNIX timestamp in seconds.
      */
     public function getExpirationTimestamp () {
         return $this->expires_at;
@@ -165,7 +171,7 @@ class AccessToken {
         }
 
         // The request must be made on behalf of the user (using user access_token).
-        $user = new \Gajus\Puss\User($this->app, $this);
+        $user = new \Gajus\Puss\User($this);
 
         // First we need to get the code using the long-lived access token.
         // @see https://developers.facebook.com/docs/facebook-login/access-tokens#long-via-code

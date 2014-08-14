@@ -16,7 +16,7 @@ class UserTest extends PHPUnit_Framework_TestCase {
 
         $access_token = new Gajus\Puss\AccessToken($this->app, $this->raw_user['access_token'], Gajus\Puss\AccessToken::TYPE_USER);
 
-        $this->user = new Gajus\Puss\User($this->app, $access_token);
+        $this->user = new Gajus\Puss\User($access_token);
     }
 
     public function testGetUserId () {
