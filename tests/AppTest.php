@@ -1,7 +1,7 @@
 <?php
 /**
- * @link https://github.com/gajus/puss for the canonical source repository
- * @license https://github.com/gajus/puss/blob/master/LICENSE BSD 3-Clause
+ * @link https://github.com/gajus/fuss for the canonical source repository
+ * @license https://github.com/gajus/fuss/blob/master/LICENSE BSD 3-Clause
  */
 class AppTest extends PHPUnit_Framework_TestCase {
     private
@@ -48,7 +48,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testSignedRequestFromPostIsCached () {
-        $this->assertFalse(isset($_SESSION['gajus']['puss'][\TEST_APP_ID]['signed_request']));
+        $this->assertFalse(isset($_SESSION['gajus']['fuss'][\TEST_APP_ID]['signed_request']));
 
         $signed_data = sign_data([]);
 
@@ -56,8 +56,8 @@ class AppTest extends PHPUnit_Framework_TestCase {
 
         $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
-        $this->assertTrue(isset($_SESSION['gajus']['puss'][\TEST_APP_ID]['signed_request']));
-        $this->assertSame($signed_data, $_SESSION['gajus']['puss'][\TEST_APP_ID]['signed_request']);
+        $this->assertTrue(isset($_SESSION['gajus']['fuss'][\TEST_APP_ID]['signed_request']));
+        $this->assertSame($signed_data, $_SESSION['gajus']['fuss'][\TEST_APP_ID]['signed_request']);
     }
 
     public function testGetSignedRequestFromCookie () {
@@ -69,7 +69,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testGetSignedRequestFromSession () {
-        $_SESSION['gajus']['puss'][\TEST_APP_ID]['signed_request'] = sign_data(['foo' => 'bar']);
+        $_SESSION['gajus']['fuss'][\TEST_APP_ID]['signed_request'] = sign_data(['foo' => 'bar']);
 
         $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 

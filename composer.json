@@ -3,7 +3,7 @@
     "version": "2.0.0",
     "description": "The Facebook SDK for PHP provides an interface to the Graph API.",
     "keywords": ["facebook", "sdk"],
-    "homepage": "https://github.com/gajus/puss",
+    "homepage": "https://github.com/gajus/fuss",
     "type": "library",
     "license": "BSD-3-Clause",
     "authors": [

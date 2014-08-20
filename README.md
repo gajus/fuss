@@ -1,9 +1,9 @@
 # Fuss
 
-[![Build Status](https://travis-ci.org/gajus/puss.png?branch=master)](https://travis-ci.org/gajus/puss)
-[![Coverage Status](https://coveralls.io/repos/gajus/puss/badge.png?branch=master)](https://coveralls.io/r/gajus/puss?branch=master)
-[![Latest Stable Version](https://poser.pugx.org/gajus/puss/version.png?decache)](https://packagist.org/packages/gajus/puss)
-[![License](https://poser.pugx.org/gajus/puss/license.png)](https://packagist.org/packages/gajus/puss)
+[![Build Status](https://travis-ci.org/gajus/fuss.png?branch=master)](https://travis-ci.org/gajus/fuss)
+[![Coverage Status](https://coveralls.io/repos/gajus/fuss/badge.png?branch=master)](https://coveralls.io/r/gajus/fuss?branch=master)
+[![Latest Stable Version](https://poser.pugx.org/gajus/fuss/version.png?decache)](https://packagist.org/packages/gajus/fuss)
+[![License](https://poser.pugx.org/gajus/fuss/license.png)](https://packagist.org/packages/gajus/fuss)
 
 The Facebook SDK for PHP provides an interface to the Graph API. The main difference between the [official PHP SDK](https://github.com/facebook/facebook-php-sdk-v4) and Fuss is the API.
 
@@ -11,7 +11,7 @@ The Facebook SDK for PHP provides an interface to the Graph API. The main differ
 
 The original [facebook/facebook-php-sdk](https://github.com/facebook/facebook-php-sdk) is lacking separation of concerns. The [facebook/facebook-php-sdk-v4](https://github.com/facebook/facebook-php-sdk-v4) is a big step forward. Nonetheless, it came with its own evils that I could not live with (e.g. use of stateful programming and globals). The API itself is designed to cover all uses cases, which is expected of the official SDK, though not necessary needed for an average Facebook app. Fuss is trading some of the functionality in favor of a more intuitive API.
 
-I am looking forward to hearing feedback either via gk@anuary.com or in the [issues](https://github.com/gajus/puss/issues) section.
+I am looking forward to hearing feedback either via gk@anuary.com or in the [issues](https://github.com/gajus/fuss/issues) section.
 
 ## Everything Together
 
@@ -263,14 +263,14 @@ If you are using [Composer](https://getcomposer.org/) as a package manager, add 
 ```
 {
     "require" : {
-        "gajus/puss" : "1.0.*"
+        "gajus/fuss" : "1.0.*"
     }
 }
 ```
 
 ## Tests
 
-The tests are automatically run using the [Travis-CI](https://travis-ci.org/gajus/puss) and secured app credentials.
+The tests are automatically run using the [Travis-CI](https://travis-ci.org/gajus/fuss) and secured app credentials.
 
 To run the tests locally,
 

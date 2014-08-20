@@ -2,8 +2,8 @@
 namespace Gajus\Fuss;
 
 /**
- * @link https://github.com/gajus/puss for the canonical source repository
- * @license https://github.com/gajus/puss/blob/master/LICENSE BSD 3-Clause
+ * @link https://github.com/gajus/fuss for the canonical source repository
+ * @license https://github.com/gajus/fuss/blob/master/LICENSE BSD 3-Clause
  */
 class App implements Session {
     private
@@ -34,8 +34,8 @@ class App implements Session {
 
         if (isset($_POST['signed_request'])) {  
             $this->setSignedRequest($_POST['signed_request']);
-        } else if (isset($_SESSION['gajus']['puss'][$this->getId()]['signed_request'])) {
-            $this->setSignedRequest($_SESSION['gajus']['puss'][$this->getId()]['signed_request']);
+        } else if (isset($_SESSION['gajus']['fuss'][$this->getId()]['signed_request'])) {
+            $this->setSignedRequest($_SESSION['gajus']['fuss'][$this->getId()]['signed_request']);
         } else if (isset($_COOKIE['fbsr_' . $this->getId()])) {
             $this->setSignedRequest($_COOKIE['fbsr_' . $this->getId()]);
         }
@@ -51,7 +51,7 @@ class App implements Session {
     public function setSignedRequest ($signed_request) {
         $this->signed_request = new SignedRequest($this, $signed_request);
 
-        $_SESSION['gajus']['puss'][$this->app_id]['signed_request'] = $signed_request;
+        $_SESSION['gajus']['fuss'][$this->app_id]['signed_request'] = $signed_request;
     }
 
     /**
