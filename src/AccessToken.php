@@ -1,5 +1,5 @@
 <?php
-namespace Gajus\Puss;
+namespace Gajus\Fuss;
 
 /**
  * @link https://github.com/gajus/puss for the canonical source repository
@@ -12,7 +12,7 @@ class AccessToken {
 
     private
         /**
-         * @var Gajus\Puss\App
+         * @var Gajus\Fuss\App
          */
         $app,
         /**
@@ -37,7 +37,7 @@ class AccessToken {
         $scope;
 
     /**
-     * @param Gajus\Puss\App $app
+     * @param Gajus\Fuss\App $app
      * @param string $access_token A string that identifies a user, app, or page and can be used by the app to make graph API calls.
      * @param self::TYPE_USER|self::TYPE_APP|self::TYPE_PAGE $type
      */
@@ -50,7 +50,7 @@ class AccessToken {
     }
 
     /**
-     * @return Gajus\Puss\App $app
+     * @return Gajus\Fuss\App $app
      */
     public function getApp () {
         return $this->app;
@@ -69,7 +69,7 @@ class AccessToken {
     /**
      * Populate the access token information using data retrieved from Facebook.
      * 
-     * @throws Gajus\Puss\Exception\AccessTokenException If access token is not valid.
+     * @throws Gajus\Fuss\Exception\AccessTokenException If access token is not valid.
      * @return null
      */
     private function debugToken () {
@@ -101,7 +101,7 @@ class AccessToken {
      * @return array
      */
     public function getInfo () {
-        $request = new \Gajus\Puss\Request($this->app, 'GET', 'debug_token', ['input_token' => $this->access_token]);
+        $request = new \Gajus\Fuss\Request($this->app, 'GET', 'debug_token', ['input_token' => $this->access_token]);
         
         return $request->make();
     }
@@ -145,7 +145,7 @@ class AccessToken {
             throw new Exception\AccessTokenException('Long-lived access token cannot be extended.');
         }
 
-        $request = new \Gajus\Puss\Request($this->app, 'GET', 'oauth/access_token', [
+        $request = new \Gajus\Fuss\Request($this->app, 'GET', 'oauth/access_token', [
             'client_id' => $this->app->getId(),
             'client_secret' => $this->app->getSecret(),
             'grant_type' => 'fb_exchange_token',
@@ -171,11 +171,11 @@ class AccessToken {
         }
 
         // The request must be made on behalf of the user (using user access_token).
-        $user = new \Gajus\Puss\User($this);
+        $user = new \Gajus\Fuss\User($this);
 
         // First we need to get the code using the long-lived access token.
         // @see https://developers.facebook.com/docs/facebook-login/access-tokens#long-via-code
-        $request = new \Gajus\Puss\Request($user, 'GET', 'oauth/client_code', [
+        $request = new \Gajus\Fuss\Request($user, 'GET', 'oauth/client_code', [
             'client_id' => $this->app->getId(),
             'client_secret' => $this->app->getSecret(),
             'redirect_uri' => ''
@@ -192,10 +192,10 @@ class AccessToken {
      * @see https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/v2.0#exchangecode
      * @param string $code The parameter received from the Login Dialog.
      * @param string $redirect_url This argument is required and must be the same as the original request_uri that you used when starting the OAuth login process. In case of FB.login, it is empty string.
-     * @return Gajus\Puss\AccessToken
+     * @return Gajus\Fuss\AccessToken
      */
-    static public function makeFromCode (\Gajus\Puss\App $app, $code, $redirect_url = '') {
-        $request = new \Gajus\Puss\Request($app, 'GET', 'oauth/access_token', [
+    static public function makeFromCode (\Gajus\Fuss\App $app, $code, $redirect_url = '') {
+        $request = new \Gajus\Fuss\Request($app, 'GET', 'oauth/access_token', [
             'client_id' => $app->getId(),
             'client_secret' => $app->getSecret(),
             'redirect_uri' => $redirect_url,
@@ -204,6 +204,6 @@ class AccessToken {
 
         $response = $request->make();
 
-        return new \Gajus\Puss\AccessToken($app, $response['access_token'], \Gajus\Puss\AccessToken::TYPE_USER);
+        return new \Gajus\Fuss\AccessToken($app, $response['access_token'], \Gajus\Fuss\AccessToken::TYPE_USER);
     }
 }

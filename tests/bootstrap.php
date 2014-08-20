@@ -16,12 +16,12 @@ $GLOBALS['test']['test_user'] = [];
 
 /**
  * @param string $permissions A list of comma separated permissions.
- * @return Gajus\Puss\User
+ * @return Gajus\Fuss\User
  */
 function create_test_user ($permissions = '') {
-    $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+    $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
-    $request = new Gajus\Puss\Request($app, 'POST', 'app/accounts/test-users', ['permissions' => $permissions]);
+    $request = new Gajus\Fuss\Request($app, 'POST', 'app/accounts/test-users', ['permissions' => $permissions]);
 
     $test_user = $request->make();
 
@@ -32,12 +32,12 @@ function create_test_user ($permissions = '') {
 
 /**
  * @param array $data
- * @return Gajus\Puss\SignedRequest
+ * @return Gajus\Fuss\SignedRequest
  */
 function make_signed_request (array $data) {
-    $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+    $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
-    return new Gajus\Puss\SignedRequest($app, sign_data($data));
+    return new Gajus\Fuss\SignedRequest($app, sign_data($data));
 }
 
 /**
@@ -66,10 +66,10 @@ function encode_base64_url ($input) {
 }
 
 register_shutdown_function(function () {
-    $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+    $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
     foreach ($GLOBALS['test']['test_user'] as $test_user) {
-        $request = new Gajus\Puss\Request($app, 'DELETE', $test_user['id']);
+        $request = new Gajus\Fuss\Request($app, 'DELETE', $test_user['id']);
 
         $request->make();
     }

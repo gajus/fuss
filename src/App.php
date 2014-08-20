@@ -1,5 +1,5 @@
 <?php
-namespace Gajus\Puss;
+namespace Gajus\Fuss;
 
 /**
  * @link https://github.com/gajus/puss for the canonical source repository
@@ -16,11 +16,11 @@ class App implements Session {
          */
         $app_secret,
         /**
-         * @var Gajus\Puss\SignedRequest
+         * @var Gajus\Fuss\SignedRequest
          */
         $signed_request,
         /**
-         * @var Gajus\Puss\AccessToken
+         * @var Gajus\Fuss\AccessToken
          */
         $access_token;
     
@@ -55,7 +55,7 @@ class App implements Session {
     }
 
     /**
-     * @return null|Gajus\Puss\SignedRequest
+     * @return null|Gajus\Fuss\SignedRequest
      */
     public function getSignedRequest () {
         return $this->signed_request;
@@ -80,7 +80,7 @@ class App implements Session {
      * The access token of this type bypass the access token validation.
      * 
      * @see https://developers.facebook.com/docs/facebook-login/access-tokens#apptokens
-     * @return Gajus\Puss\AccessToken
+     * @return Gajus\Fuss\AccessToken
      */
     public function getAccessToken () {
         if (!$this->access_token) {

@@ -1,5 +1,5 @@
 <?php
-namespace Gajus\Puss;
+namespace Gajus\Fuss;
 
 /**
  * @link https://github.com/gajus/puss for the canonical source repository
@@ -8,7 +8,7 @@ namespace Gajus\Puss;
 class SignedRequest {
     private
         /**
-         * @var Gajus\Puss\App
+         * @var Gajus\Fuss\App
          */
         $app,
         /**
@@ -16,13 +16,13 @@ class SignedRequest {
          */
         $signed_request,
         /**
-         * @var Gajus\Puss\AccessToken
+         * @var Gajus\Fuss\AccessToken
          */
         $access_token;
     
     /**
      * @param string $raw_signed_request It is base64url encoded and signed with an HMAC version of your App Secret, based on the OAuth 2.0 spec.
-     * @param Gajus\Puss\App $app
+     * @param Gajus\Fuss\App $app
      */
     public function __construct (App $app, $raw_signed_request) {
         $this->app = $app;
@@ -33,14 +33,14 @@ class SignedRequest {
      * Resolve the user access token from the signed request.
      * The access token is either provided or it can be exchanged for the code.
      *
-     * @return null|Gajus\Puss\AccessToken
+     * @return null|Gajus\Fuss\AccessToken
      */
     public function getAccessToken () {
         if (!$this->access_token) {
             if (isset($this->signed_request['oauth_token'])) {
-                $this->access_token = new \Gajus\Puss\AccessToken($this->app, $this->signed_request['oauth_token'], \Gajus\Puss\AccessToken::TYPE_USER);
+                $this->access_token = new \Gajus\Fuss\AccessToken($this->app, $this->signed_request['oauth_token'], \Gajus\Fuss\AccessToken::TYPE_USER);
             } else if (isset($this->signed_request['code'])) {
-                $this->access_token = \Gajus\Puss\AccessToken::makeFromCode($this->app, $this->signed_request['code']);
+                $this->access_token = \Gajus\Fuss\AccessToken::makeFromCode($this->app, $this->signed_request['code']);
             }
         }
 

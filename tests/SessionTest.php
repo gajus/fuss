@@ -19,7 +19,7 @@ class SessionTest extends PHPUnit_Framework_TestCase {
     }
 
     public function sessionProvider () {
-        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+        $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
         
         return [
             [$app, \TEST_APP_SECRET, \TEST_APP_ID . '|' . \TEST_APP_SECRET],

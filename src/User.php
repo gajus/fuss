@@ -1,5 +1,5 @@
 <?php
-namespace Gajus\Puss;
+namespace Gajus\Fuss;
 
 /**
  * @link https://github.com/gajus/puss for the canonical source repository
@@ -12,14 +12,14 @@ class User implements Session {
          */
         $id,
         /**
-         * @var Gajus\Puss\AccessToken
+         * @var Gajus\Fuss\AccessToken
          */
         $access_token;
     
     /**
-     * @param Gajus\Puss\AccessToken $access_token
+     * @param Gajus\Fuss\AccessToken $access_token
      */
-    public function __construct (\Gajus\Puss\AccessToken $access_token) {
+    public function __construct (\Gajus\Fuss\AccessToken $access_token) {
         $this->setAccessToken($access_token);
     }
 
@@ -35,27 +35,27 @@ class User implements Session {
     }
 
     /**
-     * @param Gajus\Puss\AccessToken $access_token
+     * @param Gajus\Fuss\AccessToken $access_token
      * @return null
      */
-    public function setAccessToken (\Gajus\Puss\AccessToken $access_token) {
+    public function setAccessToken (\Gajus\Fuss\AccessToken $access_token) {
         $this->access_token = $access_token;
 
-        $request = new \Gajus\Puss\Request($this, 'GET', 'me', ['fields' => 'id']);
+        $request = new \Gajus\Fuss\Request($this, 'GET', 'me', ['fields' => 'id']);
         
         $response = $request->make();
 
         // @todo Check if it is user access token, as oppose to page or whatever.
 
         if ($this->id && $response['id'] !== $this->id) {
-            throw new \Gajus\Puss\Exception\UserException('The new access token is for a different user.');
+            throw new \Gajus\Fuss\Exception\UserException('The new access token is for a different user.');
         }
 
         $this->id = $response['id'];
     }
 
     /**
-     * @return Gajus\Puss\AccessToken
+     * @return Gajus\Fuss\AccessToken
      */
     public function getAccessToken () {
         return $this->access_token;

@@ -8,7 +8,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $app;
 
     public function setUp () {
-        $this->app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+        $this->app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
     }
 
     public function testGetId () {
@@ -42,7 +42,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
     public function testGetSignedRequestFromPost () {
         $_POST['signed_request'] = sign_data(['foo' => 'bar']);
 
-        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+        $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
         $this->assertSame(['foo' => 'bar'], $app->getSignedRequest()->getPayload());
     }
@@ -54,7 +54,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
 
         $_POST['signed_request'] = $signed_data;
 
-        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+        $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
         $this->assertTrue(isset($_SESSION['gajus']['puss'][\TEST_APP_ID]['signed_request']));
         $this->assertSame($signed_data, $_SESSION['gajus']['puss'][\TEST_APP_ID]['signed_request']);
@@ -63,7 +63,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
     public function testGetSignedRequestFromCookie () {
         $_COOKIE['fbsr_' . $this->app->getId()]= sign_data(['foo' => 'bar']);
 
-        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+        $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
         $this->assertSame(['foo' => 'bar'], $app->getSignedRequest()->getPayload());
     }
@@ -71,7 +71,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
     public function testGetSignedRequestFromSession () {
         $_SESSION['gajus']['puss'][\TEST_APP_ID]['signed_request'] = sign_data(['foo' => 'bar']);
 
-        $app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+        $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
         $this->assertSame(['foo' => 'bar'], $app->getSignedRequest()->getPayload());
     }

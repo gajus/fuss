@@ -1,5 +1,5 @@
 <?php
-namespace Gajus\Puss;
+namespace Gajus\Fuss;
 
 /**
  * @link https://github.com/gajus/puss for the canonical source repository
@@ -7,13 +7,13 @@ namespace Gajus\Puss;
  */
 class Request {
     /**
-     * Refers to the Puss release version.
+     * Refers to the Fuss release version.
      */
     const AGENT_VERSION = '1.0.1';
 
     private
         /**
-         * @var Gajus\Puss\Session
+         * @var Gajus\Fuss\Session
          */
         $session,
         /**
@@ -34,12 +34,12 @@ class Request {
         $body = [];
 
     /**
-     * @param Gajus\Puss\Session $session
+     * @param Gajus\Fuss\Session $session
      * @param string $method GET|POST|DELETE
      * @param string $path Path relative to the Graph API.
      * @param array $query GET parameters.
      */
-    public function __construct (\Gajus\Puss\Session $session, $method, $path, array $query = null) {
+    public function __construct (\Gajus\Fuss\Session $session, $method, $path, array $query = null) {
         $this->session = $session;
 
         $this->setMethod($method);
@@ -125,7 +125,7 @@ class Request {
     }
 
     /**
-     * @throws Gajus\Puss\RequestException If the Graph API call results in an error.
+     * @throws Gajus\Fuss\RequestException If the Graph API call results in an error.
      * @return array Graph API response.
      */
     public function make () {    
@@ -136,7 +136,7 @@ class Request {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => 10,
             CURLOPT_TIMEOUT => 60,
-            CURLOPT_USERAGENT => 'Puss/' . self::AGENT_VERSION,
+            CURLOPT_USERAGENT => 'Fuss/' . self::AGENT_VERSION,
         ];
         
         if ($this->getMethod() === 'POST') {

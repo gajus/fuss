@@ -6,21 +6,21 @@
 class SignedRequestTest extends PHPUnit_Framework_TestCase {
     private
         /**
-         * @var Gajus\Puss\App
+         * @var Gajus\Fuss\App
          */
         $app;
 
 
     public function setUp () {
-        $this->app = new Gajus\Puss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+        $this->app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
     }
 
     /**
-     * @expectedException Gajus\Puss\Exception\SignedRequestException
+     * @expectedException Gajus\Fuss\Exception\SignedRequestException
      * @exceptedExceptionMessage Invalid signature.
      */
     public function testInvalidSignature () {
-        new Gajus\Puss\SignedRequest($this->app, sign_data([], 'abc'));
+        new Gajus\Fuss\SignedRequest($this->app, sign_data([], 'abc'));
     }
 
     public function testGetPayload () {
@@ -92,14 +92,14 @@ class SignedRequestTest extends PHPUnit_Framework_TestCase {
 
         $access_token = $signed_request->getAccessToken();
 
-        $this->assertInstanceOf('Gajus\Puss\AccessToken', $access_token);
+        $this->assertInstanceOf('Gajus\Fuss\AccessToken', $access_token);
         $this->assertSame($test_user['access_token'], $access_token->getPlain());
     }
 
     public function testGetAccessTokenWhenFromCode () {
         $test_user = create_test_user();
 
-        $access_token = new \Gajus\Puss\AccessToken($this->app, $test_user['access_token'], \Gajus\Puss\AccessToken::TYPE_USER);
+        $access_token = new \Gajus\Fuss\AccessToken($this->app, $test_user['access_token'], \Gajus\Fuss\AccessToken::TYPE_USER);
 
         $access_token->extend();
         $code = $access_token->getCode();
@@ -108,7 +108,7 @@ class SignedRequestTest extends PHPUnit_Framework_TestCase {
 
         $access_token = $signed_request->getAccessToken();
 
-        $this->assertInstanceOf('Gajus\Puss\AccessToken', $access_token);
+        $this->assertInstanceOf('Gajus\Fuss\AccessToken', $access_token);
 
         // "In some cases, this newer long-lived token might be identical to the previous one, but we can't guarantee it and your app shouldn't depend upon it."
         // @see https://developers.facebook.com/docs/facebook-login/access-tokens#refreshtokens

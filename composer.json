@@ -1,6 +1,6 @@
 {
-    "name": "gajus/puss",
-    "version": "1.0.1",
+    "name": "gajus/fuss",
+    "version": "2.0.0",
     "description": "The Facebook SDK for PHP provides an interface to the Graph API.",
     "keywords": ["facebook", "sdk"],
     "homepage": "https://github.com/gajus/puss",
@@ -20,7 +20,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Gajus\\Puss\\": "src/"
+            "Gajus\\Fuss\\": "src/"
         }
     }
 }

@@ -1,24 +1,24 @@
-# Puss
+# Fuss
 
 [![Build Status](https://travis-ci.org/gajus/puss.png?branch=master)](https://travis-ci.org/gajus/puss)
 [![Coverage Status](https://coveralls.io/repos/gajus/puss/badge.png?branch=master)](https://coveralls.io/r/gajus/puss?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/gajus/puss/version.png?decache)](https://packagist.org/packages/gajus/puss)
 [![License](https://poser.pugx.org/gajus/puss/license.png)](https://packagist.org/packages/gajus/puss)
 
-The Facebook SDK for PHP provides an interface to the Graph API. The main difference between the [official PHP SDK](https://github.com/facebook/facebook-php-sdk-v4) and Puss is the API.
+The Facebook SDK for PHP provides an interface to the Graph API. The main difference between the [official PHP SDK](https://github.com/facebook/facebook-php-sdk-v4) and Fuss is the API.
 
 ## Reinventing the Wheel
 
-The original [facebook/facebook-php-sdk](https://github.com/facebook/facebook-php-sdk) is lacking separation of concerns. The [facebook/facebook-php-sdk-v4](https://github.com/facebook/facebook-php-sdk-v4) is a big step forward. Nonetheless, it came with its own evils that I could not live with (e.g. use of stateful programming and globals). The API itself is designed to cover all uses cases, which is expected of the official SDK, though not necessary needed for an average Facebook app. Puss is trading some of the functionality in favor of a more intuitive API.
+The original [facebook/facebook-php-sdk](https://github.com/facebook/facebook-php-sdk) is lacking separation of concerns. The [facebook/facebook-php-sdk-v4](https://github.com/facebook/facebook-php-sdk-v4) is a big step forward. Nonetheless, it came with its own evils that I could not live with (e.g. use of stateful programming and globals). The API itself is designed to cover all uses cases, which is expected of the official SDK, though not necessary needed for an average Facebook app. Fuss is trading some of the functionality in favor of a more intuitive API.
 
 I am looking forward to hearing feedback either via gk@anuary.com or in the [issues](https://github.com/gajus/puss/issues) section.
 
 ## Everything Together
 
-The following example is meant to cover the most common use scenario for Puss. If you need further guidance, this document contains description of every Puss SDK use-case and method.
+The following example is meant to cover the most common use scenario for Fuss. If you need further guidance, this document contains description of every Fuss SDK use-case and method.
 
 ```php
-$app = new Gajus\Puss\App('your app ID', 'your app secret');
+$app = new Gajus\Fuss\App('your app ID', 'your app secret');
 $user = null;
 
 $signed_request = $app->getSignedRequest();
@@ -31,12 +31,12 @@ if ($signed_request) {
             $access_token->extend();
         }
 
-        $user = new Gajus\Puss\User($access_token);
+        $user = new Gajus\Fuss\User($access_token);
     }
 }
 
 if ($user) {
-    $request = new Gajus\Puss\Request($user, 'GET', 'me', ['fields' => 'first_name']);
+    $request = new Gajus\Fuss\Request($user, 'GET', 'me', ['fields' => 'first_name']);
     $response = $request->make();
 
     // $response['first_name']
@@ -54,14 +54,14 @@ Initialize the SDK with your app ID and secret:
  * @param string $app_id App ID.
  * @param string $app_secret App secret.
  */
-$app = new Gajus\Puss\App('your app ID', 'your app secret');
+$app = new Gajus\Fuss\App('your app ID', 'your app secret');
 ```
 
-> In the original Facebook PHP SDK, [`FacebookSession::setDefaultApplication`](https://developers.facebook.com/docs/php/gettingstarted/4.0.0#init) is used to set the default app credentials statically, making them accessible for future calls without needing to reference an equivalent of the `Gajus\Puss\App` instance.
+> In the original Facebook PHP SDK, [`FacebookSession::setDefaultApplication`](https://developers.facebook.com/docs/php/gettingstarted/4.0.0#init) is used to set the default app credentials statically, making them accessible for future calls without needing to reference an equivalent of the `Gajus\Fuss\App` instance.
 
 ## Get the Signed Request
 
-The [signed request](https://developers.facebook.com/docs/reference/login/signed-request/) is encapsulated in the `Gajus\Puss\SignedRequest` entity. It is available via an instance of `App` when either of the following is true:
+The [signed request](https://developers.facebook.com/docs/reference/login/signed-request/) is encapsulated in the `Gajus\Fuss\SignedRequest` entity. It is available via an instance of `App` when either of the following is true:
 
 * The signed request was received via the `$_POST['signed_request']`.
 * The signed request is present in the user session.
@@ -69,7 +69,7 @@ The [signed request](https://developers.facebook.com/docs/reference/login/signed
 
 ```php
 /**
- * @return null|Gajus\Puss\SignedRequest
+ * @return null|Gajus\Fuss\SignedRequest
  */
 $signed_request = $app->getSignedRequest();
 ```
@@ -128,7 +128,7 @@ $signed_request->getPayload();
 
 ## Get the User Access Token
 
-The `Gajus\Puss\AccessToken` is available when either of the following is true:
+The `Gajus\Fuss\AccessToken` is available when either of the following is true:
 
 * The signed request had the `access_token`.
 * The signed request had `code` that has been exchanged for the access token.
@@ -138,7 +138,7 @@ The `Gajus\Puss\AccessToken` is available when either of the following is true:
  * Resolve the user access token from the signed request.
  * The access token is either provided or it can be exchanged for the code.
  *
- * @return null|Gajus\Puss\AccessToken
+ * @return null|Gajus\Fuss\AccessToken
  */
 $access_token = $signed_request->getAccessToken();
 ```
@@ -147,11 +147,11 @@ You can build an `AccessToken` if you have it (e.g. stored in the database):
 
 ```php
 /**
- * @param Gajus\Puss\App $app
+ * @param Gajus\Fuss\App $app
  * @param string $access_token A string that identifies a user, app, or page and can be used by the app to make graph API calls.
  * @param self::TYPE_USER|self::TYPE_APP|self::TYPE_PAGE $type
  */
-$access_token = new Gajus\Puss\AccessToken($app, 'user access token', Gajus\Puss\AccessToken::TYPE_USER);
+$access_token = new Gajus\Fuss\AccessToken($app, 'user access token', Gajus\Fuss\AccessToken::TYPE_USER);
 ```
 
 ### Extend The Access Token
@@ -208,9 +208,9 @@ In order to make calls on behalf of a [user](https://developers.facebook.com/doc
 
 ```php
 /**
- * @param Gajus\Puss\AccessToken $access_token
+ * @param Gajus\Fuss\AccessToken $access_token
  */
-$user = new Gajus\Puss\User($access_token);
+$user = new Gajus\Fuss\User($access_token);
 ```
 
 Upon instantiating the `User` object, the access token is used to fetch information about the user.
@@ -230,7 +230,7 @@ You can update user access token:
 
 ```php
 /**
- * @param Gajus\Puss\AccessToken $access_token
+ * @param Gajus\Fuss\AccessToken $access_token
  * @return null
  */
 $user->setAccessToken($access_token);
@@ -238,19 +238,19 @@ $user->setAccessToken($access_token);
 
 ## Making Graph API calls
 
-An API call can be made using either `Gajus\Puss\App` or `Gajus\Puss\User` context. If use `App` context, then app access token is used; is use `User` context, then user access token is used.
+An API call can be made using either `Gajus\Fuss\App` or `Gajus\Fuss\User` context. If use `App` context, then app access token is used; is use `User` context, then user access token is used.
 
 ```php
 /**
- * @param Gajus\Puss\Session $session
+ * @param Gajus\Fuss\Session $session
  * @param string $method GET|POST|DELETE
  * @param string $path Path relative to the Graph API.
  * @param array $query GET parameters.
  */
-$request = new Gajus\Puss\Request($app, 'GET', 'app');
+$request = new Gajus\Fuss\Request($app, 'GET', 'app');
 
 /**
- * @throws Gajus\Puss\RequestException If the Graph API call results in an error.
+ * @throws Gajus\Fuss\RequestException If the Graph API call results in an error.
  * @return array Graph API response.
  */
 $request->make();
