@@ -184,7 +184,7 @@ class App implements Session {
 
                 $query['gajus']['fuss']['third_party_cookie'] = $this->getTopUrl();
 
-                $query = http_build_str($query);
+                $query = http_build_query($query);
 
                 $request_url = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
                 $request_url .= '://' . $_SERVER['HTTP_HOST'];
@@ -217,7 +217,7 @@ class App implements Session {
             $top_url = 'https://www.facebook.com/' . $signed_request->getPageTab()->getId() . '/app_' . $this->getId();
 
             if ($app_data = $signed_request->getAppData()) {
-                $top_url .= '?' . http_build_str(['app_data' => $app_data]);
+                $top_url .= '?' . http_build_query(['app_data' => $app_data]);
             }
         } else {
             $top_url = 'https://apps.facebook.com/' . $this->getId() . '/';
