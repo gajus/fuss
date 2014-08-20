@@ -19,3 +19,6 @@ script:
 
 after_success:
   - php vendor/bin/coveralls -v
+
+notifications:
+  email: false
