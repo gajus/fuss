@@ -18,7 +18,11 @@ I am looking forward to hearing feedback either via gk@anuary.com or in the [iss
 The following example is meant to cover the most common use scenario for Fuss. If you need further guidance, this document contains description of every Fuss SDK use-case and method.
 
 ```php
-$app = new Gajus\Fuss\App('your app ID', 'your app secret');
+/**
+ * @param int $app_id App ID.
+ * @param string $app_secret App secret.
+ */
+$app = new Gajus\Fuss\App(123, 'abc');
 $user = null;
 
 $signed_request = $app->getSignedRequest();
@@ -100,13 +104,6 @@ A signed request contains some additional fields of information, even before per
  * @return null|int
  */
 $signed_request->getUserId();
-
-/**
- * Page ID when a Page tab loads the app.
- * 
- * @return null|int
- */
-$signed_request->getPageId();
 
 /**
  * The content of the app_data query string parameter which may be passed if the app is being loaded within a Page Tab.
@@ -255,6 +252,47 @@ $request = new Gajus\Fuss\Request($app, 'GET', 'app');
  */
 $request->make();
 ```
+
+## Page Tab
+
+When an app is loaded in the [page tab](https://developers.facebook.com/docs/appsonfacebook/pagetabs), the signed request contains information about the page itself. This information is abstracted using the `PageTab` class:
+
+```php
+/**
+ * Return PageTab when app is loaded in a page tab.
+ * 
+ * @return null|Gajus\Fuss\PageTab
+ */
+$page_tab = $signed_request->getPageTab();
+```
+
+The abstracted data is accessed via the following methods:
+
+```php
+/**
+ * The page ID.
+ * 
+ * @return int
+ */
+$page_tab->getId();
+
+/**
+ * true if the loading user has liked the page, false if not.
+ * 
+ * @deprecated This field will no longer be included for any app created after the launch of v2.1 (August 7th, 2014), and will be permanently set to true for all other apps on November 5th, 2014.
+ * @see https://developers.facebook.com/docs/reference/login/signed-request
+ * @return boolean
+ */
+$page_tab->isLiked();
+
+/**
+ * true if the loading user is an admin of the page.
+ * 
+ * @return boolean
+ */
+$page_tab->isAdmin();
+```
+
 
 ## Installation
 

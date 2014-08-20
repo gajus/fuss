@@ -18,7 +18,7 @@ class PageTab {
     public function __construct (\Gajus\Fuss\SignedRequest $signed_request) {
         $payload = $signed_request->getPayload();
 
-        if (!isset($payload['page']['id'])) {
+        if (!isset($payload['page'])) {
             throw new Exception\PageTabException('Signed request does not describe page tab.');
         }
 
@@ -26,25 +26,27 @@ class PageTab {
     }
 
     /**
-     * Facebook page ID.
+     * The page ID.
      * 
      * @return int
      */
-    public function getPageId () {
+    public function getId () {
         return (int) $this->page['id'];
     }
 
     /**
-     * Returns true if user has liked the Facebook page holding the tab.
+     * true if the loading user has liked the page, false if not.
      * 
+     * @deprecated This field will no longer be included for any app created after the launch of v2.1 (August 7th, 2014), and will be permanently set to true for all other apps on November 5th, 2014.
+     * @see https://developers.facebook.com/docs/reference/login/signed-request
      * @return boolean
      */
     public function isLiked () {
-        return (boolean) $this->page['liked'];
+        return isset($this->page['liked']) && $this->page['liked'];
     }
 
     /**
-     * Return true if user is admin of the Facebook page holding the tab.
+     * true if the loading user is an admin of the page.
      * 
      * @return boolean
      */

@@ -57,12 +57,16 @@ class SignedRequest {
     }
 
     /**
-     * Page ID when a Page tab loads the app.
+     * Return PageTab when app is loaded in a page tab.
      * 
-     * @return null|int
+     * @return null|Gajus\Fuss\PageTab
      */
-    public function getPageId () {
-        return isset($this->signed_request['page']['id']) ? (int) $this->signed_request['page']['id'] : null;
+    public function getPageTab () {
+        if (!isset($this->signed_request['page'])) {
+            return;
+        }
+
+        return new \Gajus\Fuss\PageTab($this);
     }
 
     /**

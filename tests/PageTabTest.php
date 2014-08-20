@@ -14,7 +14,7 @@ class PageTabTest extends PHPUnit_Framework_TestCase {
         $page_tab = new Gajus\Fuss\PageTab($signed_request);
     }
 
-    public function testGetPageId () {
+    public function testGetId () {
         $signed_request = make_signed_request([
             'page' => [
                 'id' => '123'
@@ -23,7 +23,7 @@ class PageTabTest extends PHPUnit_Framework_TestCase {
 
         $page_tab = new Gajus\Fuss\PageTab($signed_request);
 
-        $this->assertSame(123, $page_tab->getPageId());
+        $this->assertSame(123, $page_tab->getId());
     }
 
     public function testPageTabIsLiked () {

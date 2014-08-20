@@ -69,14 +69,18 @@ class SignedRequestTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(123, $signed_request->getUserId(), 'User has authorized the app.');
     }
 
-    public function testGetPageId () {
+    public function testGetPageTab () {
         $signed_request = make_signed_request([]);
 
-        $this->assertNull($signed_request->getPageId(), 'Signed request is coming not from canvas.');
+        $this->assertNull($signed_request->getPageTab(), 'Signed request is coming not from page tab.');
 
-        $signed_request = make_signed_request(['page' => ['id' => 123]]);
+        $signed_request = make_signed_request([
+            'page' => [
+                'id' => 123
+            ]
+        ]);
 
-        $this->assertSame(123, $signed_request->getPageId(), 'Signed request is coming from canvas.');
+        $this->assertInstanceOf('Gajus\\Fuss\\PageTab', $signed_request->getPageTab(), 'Signed request is coming from page tab.');
     }
 
     public function testGetAccessTokenWhenVoid () {
