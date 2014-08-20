@@ -76,7 +76,9 @@ $app = new Gajus\Fuss\App('your app ID', 'your app secret', [
 $request = new Gajus\Fuss\Request($app, 'GET', 'app');
 ```
 
-The above will produce a request against https://graph.facebook.com/v2.1/app URL. You can overwrite the version at the time of the request as well:
+The above will produce a request against https://graph.facebook.com/v2.1/app URL.
+
+You can overwrite the default version at the time of making a request:
 
 ```php
 $app = new Gajus\Fuss\App('your app ID', 'your app secret', [
@@ -86,7 +88,7 @@ $app = new Gajus\Fuss\App('your app ID', 'your app secret', [
 $request = new Gajus\Fuss\Request($app, 'GET', 'v2.0/app');
 ```
 
-Excluding the version form the request path and not setting the `Gajus\Fuss\App::OPTION_VERSION` will make all request URLs version-less.
+Excluding the version from the request path and not setting the `Gajus\Fuss\App::OPTION_VERSION` will make all request URLs version-less.
 
 ## Get the Signed Request
 
