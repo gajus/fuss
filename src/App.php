@@ -6,7 +6,13 @@ namespace Gajus\Fuss;
  * @license https://github.com/gajus/fuss/blob/master/LICENSE BSD 3-Clause
  */
 class App implements Session {
+    const OPTION_VERSION = 'version';
+
     private
+        /**
+         * @array
+         */
+        $options = [],
         /**
          * @var int App ID.
          */
@@ -27,10 +33,15 @@ class App implements Session {
     /**
      * @param int $app_id App ID.
      * @param string $app_secret App secret.
+     * @param array $options
      */
-    public function __construct ($app_id, $app_secret) {
+    public function __construct ($app_id, $app_secret, array $options = []) {
         $this->app_id = (int) $app_id;
         $this->app_secret = (string) $app_secret;
+
+        foreach ($options as $name => $value) {
+            $this->setOption($name, $value);
+        }
 
         if (isset($_POST['signed_request'])) {  
             $this->setSignedRequest($_POST['signed_request']);
@@ -39,6 +50,37 @@ class App implements Session {
         } else if (isset($_COOKIE['fbsr_' . $this->getId()])) {
             $this->setSignedRequest($_COOKIE['fbsr_' . $this->getId()]);
         }
+    }
+
+    /**
+     * @param self::OPTION_VERSION $name
+     * @param mixed $value
+     * @return null
+     */
+    private function setOption ($name, $value) {
+        if ($name !== self::OPTION_VERSION) {
+            throw new Exception\AppException('Invalid option.');
+        }
+
+        if ($name === self::OPTION_VERSION) {
+            if (!preg_match('/^v\d\.\d$/', $value)) {
+                throw new Exception\AppException('Invalid OPTION_VERSION value format.');
+            }
+        }
+
+        $this->options[$name] = $value;
+    }
+
+    /**
+     * @param self::OPTION_VERSION $name
+     * @return mixed
+     */
+    public function getOption ($name) {
+        if ($name !== self::OPTION_VERSION) {
+            throw new Exception\AppException('Invalid option.');
+        }
+
+        return isset($this->options[$name]) ? $this->options[$name] : null;
     }
 
     /**

@@ -26,6 +26,30 @@ class RequestTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('https://graph.facebook.com/app?access_token=' . urlencode($access_token) . '&appsecret_proof=' . self::getAppSecretProof($access_token), $request->getUrl());
     }
 
+    public function testGetAppUrlWithOptionVersion () {
+        $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET, [
+            Gajus\Fuss\App::OPTION_VERSION => 'v2.0'
+        ]);
+
+        $request = new Gajus\Fuss\Request($app, 'GET', 'app');
+
+        $url = parse_url($request->getUrl());
+
+        $this->assertSame('/v2.0/app', $url['path']);
+    }
+
+    public function testGetAppUrlOverwriteOptionVersion () {
+        $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET, [
+            Gajus\Fuss\App::OPTION_VERSION => 'v2.0'
+        ]);
+
+        $request = new Gajus\Fuss\Request($app, 'GET', 'v2.1/app');
+
+        $url = parse_url($request->getUrl());
+
+        $this->assertSame('/v2.1/app', $url['path']);
+    }
+
     public function testGetUserUrl () {
         $access_token = create_test_user()['access_token'];
 

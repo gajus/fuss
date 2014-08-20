@@ -57,11 +57,36 @@ Initialize the SDK with your app ID and secret:
 /**
  * @param string $app_id App ID.
  * @param string $app_secret App secret.
+ * @param array $options
  */
 $app = new Gajus\Fuss\App('your app ID', 'your app secret');
 ```
 
 > In the original Facebook PHP SDK, [`FacebookSession::setDefaultApplication`](https://developers.facebook.com/docs/php/gettingstarted/4.0.0#init) is used to set the default app credentials statically, making them accessible for future calls without needing to reference an equivalent of the `Gajus\Fuss\App` instance.
+
+### Options
+
+`App` constructor accepts option `Gajus\Fuss\App::OPTION_VERSION`. This option specifies the default version of the Graph API to use, e.g.
+
+```php
+$app = new Gajus\Fuss\App('your app ID', 'your app secret', [
+    Gajus\Fuss\App::OPTION_VERSION => 'v2.1'
+]);
+
+$request = new Gajus\Fuss\Request($app, 'GET', 'app');
+```
+
+The above will produce a request against https://graph.facebook.com/v2.1/app URL. You can overwrite the version at the time of the request as well:
+
+```php
+$app = new Gajus\Fuss\App('your app ID', 'your app secret', [
+    Gajus\Fuss\App::OPTION_VERSION => 'v2.1'
+]);
+
+$request = new Gajus\Fuss\Request($app, 'GET', 'v2.0/app');
+```
+
+Excluding the version form the request path and not setting the `Gajus\Fuss\App::OPTION_VERSION` will make all request URLs version-less.
 
 ## Get the Signed Request
 

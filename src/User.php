@@ -62,13 +62,6 @@ class User implements Session {
     }
 
     /**
-     * @return string App secret.
-     */
-    public function getSecret () {
-        return $this->access_token->getApp()->getSecret();
-    }
-
-    /**
      * Return generic information about the user.
      * 
      * @return array

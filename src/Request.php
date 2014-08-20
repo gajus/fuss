@@ -9,7 +9,7 @@ class Request {
     /**
      * Refers to the Fuss release version.
      */
-    const AGENT_VERSION = '2.0.3';
+    const AGENT_VERSION = '2.0.4';
 
     private
         /**
@@ -90,7 +90,16 @@ class Request {
             throw new Exception\RequestException('Path must not have hard-coded query parameters.');
         }
 
-        $this->path = $path;
+        $this->path = ltrim($path, '/');
+    }
+
+    /**
+     * True if user provided path explicitly names Graph API endpoint version, e.g. /v2.1/me.
+     * 
+     * @return boolean
+     */
+    private function isPathVersioned () {
+        return preg_match('/^v\d\.\d\//', $this->path);
     }
 
     /**
@@ -111,7 +120,13 @@ class Request {
      * @return string
      */
     public function getUrl () {
-        $url = 'https://graph.facebook.com/' . ltrim($this->path, '/');
+        $path = $this->path;
+
+        if (!$this->isPathVersioned() && $version = $this->session->getAccessToken()->getApp()->getOption(\Gajus\Fuss\App::OPTION_VERSION)) {
+            $path = $version . '/' . $path;
+        }
+
+        $url = 'https://graph.facebook.com/' . $path;
 
         $this->query['access_token'] = $this->session->getAccessToken()->getPlain();
         $this->query['appsecret_proof'] = $this->getAppSecretProof();
@@ -192,6 +207,8 @@ class Request {
      * @see https://developers.facebook.com/docs/reference/api/securing-graph-api/
      */
     private function getAppSecretProof () {
-       return hash_hmac('sha256', $this->session->getAccessToken()->getPlain(), $this->session->getSecret());
+        $access_token = $this->session->getAccessToken();
+
+        return hash_hmac('sha256', $access_token->getPlain(), $access_token->getApp()->getSecret());
     }
 }

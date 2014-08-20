@@ -11,6 +11,55 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $this->app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
     }
 
+    public function testSetVersionOption () {
+        $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET, [
+            Gajus\Fuss\App::OPTION_VERSION => 'v2.0'
+        ]);
+    }
+
+    /**
+     * @expectedException Gajus\Fuss\Exception\AppException
+     * @expectedExceptionMessage Invalid OPTION_VERSION value format.
+     */
+    public function testSetInvalidVersionOption () {
+        $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET, [
+            Gajus\Fuss\App::OPTION_VERSION => '2.0'
+        ]);
+    }
+
+    /**
+     * @expectedException Gajus\Fuss\Exception\AppException
+     * @expectedExceptionMessage Invalid option.
+     */
+    public function testSetInvalidOption () {
+        $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET, [
+            'foobar' => 'v2.0'
+        ]);
+    }
+
+    public function testGetSetOption () {
+        $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET, [
+            Gajus\Fuss\App::OPTION_VERSION => 'v2.0'
+        ]);
+
+        $this->assertSame('v2.0', $app->getOption(Gajus\Fuss\App::OPTION_VERSION));
+    }
+
+    public function testGetUnsetOption () {
+        $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+
+        $this->assertNull($app->getOption(Gajus\Fuss\App::OPTION_VERSION));
+    }
+
+    /**
+     * @expectedException Gajus\Fuss\Exception\AppException
+     * @expectedExceptionMessage Invalid option.
+     */
+    public function testGetInvalidOption () {
+        $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+        $app->getOption('foobar');
+    }
+
     public function testGetId () {
         $this->assertSame((int) \TEST_APP_ID, $this->app->getId());
     }
