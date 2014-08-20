@@ -29,15 +29,15 @@ class AppTest extends PHPUnit_Framework_TestCase {
 
     /**
      * @expectedException Gajus\Fuss\Exception\AppException
-     * @expectedExceptionMessage Invalid option.
+     * @expectedExceptionMessage Invalid OPTION_FORCE_COOKIE value format.
      */
-    public function testSetInvalidOption () {
+    public function testSetInvalidForceCookieOption () {
         $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET, [
-            'foobar' => 'v2.0'
+            Gajus\Fuss\App::OPTION_FORCE_COOKIE => 'foo'
         ]);
     }
 
-    public function testGetSetOption () {
+    public function testGetVersionOption () {
         $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET, [
             Gajus\Fuss\App::OPTION_VERSION => 'v2.0'
         ]);
@@ -45,10 +45,12 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('v2.0', $app->getOption(Gajus\Fuss\App::OPTION_VERSION));
     }
 
-    public function testGetUnsetOption () {
-        $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+    public function testGetForceCookieOption () {
+        $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET, [
+            Gajus\Fuss\App::OPTION_FORCE_COOKIE => true
+        ]);
 
-        $this->assertNull($app->getOption(Gajus\Fuss\App::OPTION_VERSION));
+        $this->assertTrue($app->getOption(Gajus\Fuss\App::OPTION_FORCE_COOKIE));
     }
 
     /**
@@ -123,5 +125,60 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
 
         $this->assertSame(['foo' => 'bar'], $app->getSignedRequest()->getPayload());
+    }
+
+    /**
+     * @expectedException Gajus\Fuss\Exception\AppException
+     * @expectedExceptionMessage App is not loaded in Page Tab or Canvas.
+     */
+    public function testGetTopUrlInInvalidContext () {
+        $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+        $this->app->getTopUrl();
+    }
+
+    /**
+     * @dataProvider getTopUrlProvider
+     */
+    public function testGetTopUrl2 (array $query, array $signed_request_data, $top_url) {
+        $_SERVER['QUERY_STRING'] = http_build_query($query);
+        $_POST['signed_request'] = sign_data($signed_request_data);
+
+        $app = new Gajus\Fuss\App(\TEST_APP_ID, \TEST_APP_SECRET);
+
+        $this->assertSame($top_url, $app->getTopUrl());
+    }
+
+    public function getTopUrlProvider () {
+        return [
+            [
+                [],
+                [],
+                'https://apps.facebook.com/' . \TEST_APP_ID . '/'
+            ],
+            [
+                ['foo' => 'bar'],
+                ['bar' => 'baz'],
+                'https://apps.facebook.com/' . \TEST_APP_ID . '/?foo=bar'
+            ],
+            [
+                [],
+                [
+                    'page' => [
+                        'id' => 123
+                    ]
+                ],
+                'https://www.facebook.com/123/app_' . \TEST_APP_ID
+            ],
+            [
+                ['bar' => 'baz'],
+                [
+                    'page' => [
+                        'id' => 123
+                    ],
+                    'app_data' => ['foo' => 'bar']
+                ],
+                'https://www.facebook.com/123/app_' . \TEST_APP_ID . '?app_data%5Bfoo%5D=bar'
+            ]
+        ];
     }
 }

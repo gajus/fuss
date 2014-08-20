@@ -9,7 +9,7 @@ class Request {
     /**
      * Refers to the Fuss release version.
      */
-    const AGENT_VERSION = '2.0.4';
+    const AGENT_VERSION = '2.0.5';
 
     private
         /**

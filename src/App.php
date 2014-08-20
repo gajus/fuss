@@ -7,12 +7,16 @@ namespace Gajus\Fuss;
  */
 class App implements Session {
     const OPTION_VERSION = 'version';
+    const OPTION_FORCE_COOKIE = 'force cookie';
 
     private
         /**
          * @array
          */
-        $options = [],
+        $options = [
+            self::OPTION_VERSION => null,
+            self::OPTION_FORCE_COOKIE => false
+        ],
         /**
          * @var int App ID.
          */
@@ -50,6 +54,10 @@ class App implements Session {
         } else if (isset($_COOKIE['fbsr_' . $this->getId()])) {
             $this->setSignedRequest($_COOKIE['fbsr_' . $this->getId()]);
         }
+
+        if ($this->getOption(self::OPTION_FORCE_COOKIE)) {
+            $this->bypassThirdPartyCookie();
+        }
     }
 
     /**
@@ -58,13 +66,15 @@ class App implements Session {
      * @return null
      */
     private function setOption ($name, $value) {
-        if ($name !== self::OPTION_VERSION) {
-            throw new Exception\AppException('Invalid option.');
-        }
+        $this->getOption($name);
 
         if ($name === self::OPTION_VERSION) {
             if (!preg_match('/^v\d\.\d$/', $value)) {
                 throw new Exception\AppException('Invalid OPTION_VERSION value format.');
+            }
+        } else if ($name === self::OPTION_FORCE_COOKIE) {
+            if (!is_bool($value)) {
+                throw new Exception\AppException('Invalid OPTION_FORCE_COOKIE value format.');
             }
         }
 
@@ -76,11 +86,11 @@ class App implements Session {
      * @return mixed
      */
     public function getOption ($name) {
-        if ($name !== self::OPTION_VERSION) {
+        if ($name !== self::OPTION_VERSION && $name !== self::OPTION_FORCE_COOKIE) {
             throw new Exception\AppException('Invalid option.');
         }
 
-        return isset($this->options[$name]) ? $this->options[$name] : null;
+        return array_key_exists($name, $this->options) ? $this->options[$name] : null;
     }
 
     /**
@@ -131,4 +141,92 @@ class App implements Session {
 
         return $this->access_token;
     }
+
+    /**
+     * When third party cookies are not accepted, client need to be redirected to the
+     * domain that needs to drop the cookies and then back to the original URL.
+     * 
+     * @codeCoverageIgnore
+     * @todo Define behavior when client does not accept cookies.
+     * @see https://github.com/gajus/fuss/issues/2
+     * @return null
+     */
+    private function bypassThirdPartyCookie () {
+        if (isset($_GET['gajus']['fuss']['third_party_cookie'])) {
+            \http_response_code(302);
+
+            header('Location: ' . $_GET['gajus']['fuss']['third_party_cookie']);
+
+            exit;
+        }
+
+        if (
+            session_status() === \PHP_SESSION_ACTIVE &&
+            // The cookie is not set.
+            (!isset($_COOKIE[session_name()]) || $_COOKIE[session_name()] !== session_id())
+            )
+        {
+            $content_type = null;
+
+            foreach (headers_list() as $header) {
+                $header = mb_strtolower($header);
+
+                if (strpos($header, 'content-type:') === 0) {
+                    $content_type = $header;
+
+                    break;
+                }
+            }
+
+            // Use JavaScript only when content-type HTML or unknown.
+            if (!$content_type || strpos($content_type, 'text/html') !== false) {
+                parse_str($_SERVER['QUERY_STRING'], $query);
+
+                $query['gajus']['fuss']['third_party_cookie'] = $this->getTopUrl();
+
+                $query = http_build_str($query);
+
+                $request_url = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http';
+                $request_url .= '://' . $_SERVER['HTTP_HOST'];
+                $request_url .= strpos($_SERVER['REQUEST_URI'], '?') === false ? $_SERVER['REQUEST_URI'] : strstr($_SERVER['REQUEST_URI'], '?', true);
+                $request_url .= '?' . $query;
+
+                ?>
+                <script>
+                window.top.location.href = <?=json_encode($request_url, \JSON_UNESCAPED_SLASHES)?>;
+                </script>
+                <?php
+            }
+        }
+    }
+
+    /**
+     * When app is loaded either in Page Tab or Canvas, the top URL is generally not known.
+     * This is an attempt to reconstruct the top URL with whatever accompanying state data.
+     * 
+     * @return string
+     */
+    public function getTopUrl () {
+        $signed_request = $this->getSignedRequest();
+
+        if (!$signed_request) {
+            throw new Exception\AppException('App is not loaded in Page Tab or Canvas.');
+        }
+
+        if ($signed_request->isPageTab()) {
+            $top_url = 'https://www.facebook.com/' . $signed_request->getPageTab()->getId() . '/app_' . $this->getId();
+
+            if ($app_data = $signed_request->getAppData()) {
+                $top_url .= '?' . http_build_str(['app_data' => $app_data]);
+            }
+        } else {
+            $top_url = 'https://apps.facebook.com/' . $this->getId() . '/';
+
+            if (!empty($_SERVER['QUERY_STRING'])) {
+                $top_url .= '?' . $_SERVER['QUERY_STRING'];
+            }
+        }
+
+        return $top_url;
+    }   
 }

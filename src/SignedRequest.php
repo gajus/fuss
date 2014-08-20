@@ -30,6 +30,15 @@ class SignedRequest {
     }
 
     /**
+     * True if signed request has been acquired through a Page Tab.
+     *
+     * @return boolean
+     */
+    public function isPageTab () {
+        return isset($this->signed_request['page']);
+    }
+
+    /**
      * Resolve the user access token from the signed request.
      * The access token is either provided or it can be exchanged for the code.
      *
@@ -62,7 +71,7 @@ class SignedRequest {
      * @return null|Gajus\Fuss\PageTab
      */
     public function getPageTab () {
-        if (!isset($this->signed_request['page'])) {
+        if (!$this->isPageTab()) {
             return;
         }
 

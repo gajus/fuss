@@ -66,7 +66,18 @@ $app = new Gajus\Fuss\App('your app ID', 'your app secret');
 
 ### Options
 
-`App` constructor accepts option `Gajus\Fuss\App::OPTION_VERSION`. This option specifies the default version of the Graph API to use, e.g.
+The options are accepted at the time of constructing the app:
+
+```php
+$app = new Gajus\Fuss\App('your app ID', 'your app secret', [
+    Gajus\Fuss\App::OPTION_VERSION => 'v2.1',
+    Gajus\Fuss\App::OPTION_FORCE_COOKIE => true
+]);
+```
+
+#### `Gajus\Fuss\App::OPTION_VERSION`
+
+This option specifies the default version of the Graph API to use, e.g.
 
 ```php
 $app = new Gajus\Fuss\App('your app ID', 'your app secret', [
@@ -97,6 +108,10 @@ $request = new Gajus\Fuss\Request($app, 'GET', 'app');
 ```
 
 The above will produce a request against `https://graph.facebook.com/app` URL.
+
+#### `Gajus\Fuss\App::OPTION_FORCE_COOKIE` (experimental)
+
+If enabled (default is disabled), Fuss SDK will attempt to set a cookie on clients that have explicitly opted not to accept third-party cookies. This is done by redirecting the user to the domain that needs to set the cookie and then redirecting user back to the Facebook Page Tab or Canvas URL. For more details, see the [original issue](https://github.com/gajus/fuss/issues/2).
 
 ## Get the Signed Request
 
