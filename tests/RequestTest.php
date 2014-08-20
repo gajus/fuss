@@ -122,7 +122,7 @@ class RequestTest extends PHPUnit_Framework_TestCase {
 
         $response = $request->make();
 
-        $this->assertSame(\TEST_APP_ID, $response['id']);
+        $this->assertSame((string) \TEST_APP_ID, $response['id']);
     }
 
     /**

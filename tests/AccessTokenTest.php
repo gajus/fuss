@@ -20,7 +20,7 @@ class AccessTokenTest extends PHPUnit_Framework_TestCase {
 
         $this->assertSame([
             'data' => [
-                'app_id' => \TEST_APP_ID,
+                'app_id' => (string) \TEST_APP_ID,
                 'is_valid' => true
             ]
         ], $info);

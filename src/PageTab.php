@@ -5,7 +5,7 @@ namespace Gajus\Fuss;
  * @link https://github.com/gajus/fuss for the canonical source repository
  * @license https://github.com/gajus/fuss/blob/master/LICENSE BSD 3-Clause
  */
-class PageTab implements Session {
+class PageTab {
     private
         /**
          * @var array
@@ -15,7 +15,7 @@ class PageTab implements Session {
     /**
      * @param Gajus\Fuss\SignedRequest $signed_request
      */
-    public function __construct (Gajus\Fuss\SignedRequest $signed_request) {
+    public function __construct (\Gajus\Fuss\SignedRequest $signed_request) {
         $payload = $signed_request->getPayload();
 
         if (!isset($payload['page']['id'])) {
@@ -31,7 +31,7 @@ class PageTab implements Session {
      * @return int
      */
     public function getPageId () {
-        return $this->page['id'];
+        return (int) $this->page['id'];
     }
 
     /**
