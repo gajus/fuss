@@ -13,6 +13,10 @@ The original [facebook/facebook-php-sdk](https://github.com/facebook/facebook-ph
 
 I am looking forward to hearing feedback either via gk@anuary.com or in the [issues](https://github.com/gajus/fuss/issues) section.
 
+## Fuss.js
+
+[Fuss.js](https://github.com/gajus/fuss.js) is an extension of Fuss. It is designed for handling Facebook user authorization.
+
 ## Everything Together
 
 The following example is meant to cover the most common use scenario for Fuss. If you need further guidance, this document contains description of every Fuss SDK use-case and method.
